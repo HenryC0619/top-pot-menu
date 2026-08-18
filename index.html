@@ -3,522 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TOP POT K BBQ & HOT POT</title>
+  <title>TOP POT HOT POT - 在线点餐</title>
   <style>
     :root {
-      --bg-dark: #121212;
-      --card-bg: #1e1e1e;
-      --card-border: #2a2a2a;
-      --accent-red: #e60012;
-      --accent-red-hover: #cc0010;
-      --gold-primary: #f5af19;
-      --gold-secondary: #e1ad01;
-      --text-main: #ffffff;
+      --bg: #121212;
+      --card: #1e1e1e;
+      --accent: #e60012;
+      --gold: #f5af19;
+      --text: #ffffff;
       --text-muted: #aaaaaa;
+      --border: #333333;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-    /* 顶部黑金招牌 Header */
-    header {
-      background: linear-gradient(180deg, #1f1f1f 0%, #121212 100%);
-      border-bottom: 2px solid var(--accent-red);
+    body {
+      background-color: var(--bg);
+      color: var(--text);
       padding: 15px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+      padding-bottom: 100px;
     }
 
-    /* 点击区域：连续点击 10 次打开设置 */
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      user-select: none;
+    header {
+      text-align: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 15px;
     }
 
-    /* TOP POT 圆形 Logo 样式 */
-    .logo-circle {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 2px solid var(--accent-red);
+    h1 {
+      color: var(--gold);
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .table-badge {
+      display: inline-block;
+      margin-top: 6px;
+      background: #2a2a2a;
+      color: var(--gold);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border: 1px solid var(--gold);
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .item-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: #000;
-      font-weight: 900;
-      line-height: 0.9;
-      color: var(--accent-red);
-      box-shadow: 0 0 8px rgba(230, 0, 18, 0.4);
-    }
-    .logo-circle .row-top { font-size: 0.8rem; letter-spacing: 1px; }
-    .logo-circle .row-mid { font-size: 1.1rem; color: #fff; }
-
-    .brand-title h1 {
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      background: linear-gradient(45deg, #fff, #ccc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .brand-title p {
-      font-size: 0.65rem;
-      color: var(--gold-primary);
-      letter-spacing: 1.5px;
-      font-weight: 700;
-    }
-
-    /* 控制栏：桌号与餐期选择 */
-    .controls-bar {
-      background: #181818;
-      padding: 10px 15px;
-      display: flex;
       justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #282828;
-    }
-    .table-info {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .table-badge {
-      background: var(--accent-red);
-      color: #fff;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      box-shadow: 0 2px 6px rgba(230, 0, 18, 0.3);
     }
 
-    .meal-toggle {
-      display: flex;
-      background: #0a0a0a;
-      border-radius: 20px;
-      padding: 3px;
-      border: 1px solid #333;
-    }
-    .meal-btn {
-      border: none;
-      padding: 5px 14px;
-      border-radius: 16px;
-      font-size: 0.8rem;
+    .item-name {
       font-weight: bold;
-      cursor: pointer;
-      background: transparent;
-      color: #888;
-      transition: all 0.2s ease;
-    }
-    .meal-btn.active {
-      background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
-      color: #000;
-      box-shadow: 0 2px 8px rgba(245, 175, 25, 0.4);
-    }
-
-    /* 菜品列表 */
-    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    
-    .category-header {
-      display: flex;
-      align-items: center;
-      margin: 20px 0 12px;
-      gap: 10px;
-    }
-    .category-title {
       font-size: 1rem;
-      font-weight: 800;
-      color: var(--gold-primary);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      white-space: nowrap;
-    }
-    .category-line {
-      height: 1px;
-      background: linear-gradient(90deg, #333, transparent);
-      width: 100%;
+      margin-bottom: 6px;
     }
 
-    .menu-item {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: all 0.2s ease;
-    }
-    .menu-item.disabled {
-      opacity: 0.3;
-      filter: grayscale(1);
-      pointer-events: none;
-      border-color: #222;
-    }
-
-    .item-info h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .item-info .tag-dinner {
-      font-size: 0.65rem;
-      color: #fff;
-      background: var(--accent-red);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
     .item-price {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--gold-primary);
+      color: var(--gold);
+      font-weight: bold;
+      font-size: 1.1rem;
     }
 
-    /* 加减按钮控制 */
-    .quantity-control { display: flex; align-items: center; gap: 10px; }
+    .qty-ctrl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      background: #151515;
+      border-radius: 6px;
+      padding: 2px;
+    }
+
     .btn-qty {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 1px solid #444;
       background: #2a2a2a;
       color: #fff;
-      font-size: 1.1rem;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      font-size: 1.2rem;
       font-weight: bold;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-qty.plus {
-      background: linear-gradient(135deg, var(--accent-red), #b3000d);
-      border: none;
-      box-shadow: 0 2px 6px rgba(230, 0, 18, 0.4);
     }
 
-    /* 底部购物车/结算栏 */
-    .cart-bar {
+    .btn-qty:active {
+      background: var(--accent);
+    }
+
+    .qty-num {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .bottom-bar {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: #181818;
-      border-top: 1px solid #282828;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      border-top: 1px solid var(--border);
       padding: 12px 20px;
-      box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 600px;
-      margin: 0 auto;
-      z-index: 90;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+      z-index: 100;
     }
-    .cart-summary { display: flex; flex-direction: column; }
-    .cart-count { font-size: 0.8rem; color: var(--text-muted); }
-    .cart-total { font-size: 1.2rem; font-weight: 800; color: var(--gold-primary); }
-    
+
+    .total-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .total-amount {
+      color: var(--gold);
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
     .btn-submit {
-      background: linear-gradient(135deg, var(--accent-red), #b3000d);
+      background: var(--accent);
       color: #fff;
       border: none;
       padding: 12px 24px;
       border-radius: 25px;
-      font-size: 0.95rem;
-      font-weight: 800;
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(230, 0, 18, 0.4);
-      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(230, 0, 18, 0.4);
     }
 
-    /* 隐藏设置弹窗 */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      justify-content: center;
-      align-items: center;
+    .btn-submit:disabled {
+      background: #555;
+      box-shadow: none;
     }
-    .modal-content {
-      background: var(--card-bg);
-      border: 1px solid #333;
-      padding: 20px;
-      border-radius: 16px;
-      width: 85%;
-      max-width: 380px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.9);
-    }
-    .modal-content h2 { font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 15px; }
-    .modal-content label { display: block; font-size: 0.8rem; color: var(--text-muted); margin: 10px 0 5px; }
-    .modal-content input {
-      width: 100%;
-      padding: 10px;
-      background: #111;
-      border: 1px solid #333;
-      color: #fff;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .btn-secondary { background: #333; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; }
-    .btn-primary { background: var(--accent-red); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="brand-logo" onclick="handleLogoClick()">
-      <div class="logo-circle">
-        <div class="row-top">T</div>
-        <div class="row-mid">P</div>
-      </div>
-      <div class="brand-title">
-        <h1>TOP POT</h1>
-        <p>K BBQ & HOT POT</p>
-      </div>
-    </div>
+    <h1>🍲 TOP POT HOT POT</h1>
+    <div class="table-badge" id="tableDisplay">桌号加载中...</div>
   </header>
 
-  <div class="controls-bar">
-    <div class="table-info">
-      桌号 <span class="table-badge" id="tableDisplay">--</span>
-    </div>
-    <div class="meal-toggle">
-      <button class="meal-btn active" id="btnLunch" onclick="switchMeal('lunch')">午市 Lunch</button>
-      <button class="meal-btn" id="btnDinner" onclick="switchMeal('dinner')">晚市 Dinner</button>
-    </div>
-  </div>
+  <main>
+    <div class="menu-grid" id="menuGrid"></div>
+  </main>
 
-  <div class="container" id="menuContainer">
+  <div class="bottom-bar">
+    <div>
+      <div class="total-label">合计金额</div>
+      <div class="total-amount" id="totalPrice">$0.00</div>
     </div>
-
-  <div class="cart-bar">
-    <div class="cart-summary">
-      <span class="cart-count">已选 <b id="cartCount" style="color:#fff;">0</b> 项</span>
-      <span class="cart-total" id="cartTotal">$0.00</span>
-    </div>
-    <button class="btn-submit" onclick="submitOrder()">发送订单</button>
-  </div>
-
-  <div class="modal" id="settingsModal">
-    <div class="modal-content">
-      <h2>后台管理设置</h2>
-      <label>GitHub Access Token:</label>
-      <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxx">
-      <label>手动修改桌号:</label>
-      <input type="text" id="manualTableInput" placeholder="输入新桌号">
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeSettings()">取消</button>
-        <button class="btn-primary" onclick="saveSettings()">保存</button>
-      </div>
-    </div>
+    <button class="btn-submit" onclick="submitOrder()">下单 (店员确认)</button>
   </div>
 
   <script>
+    // ==========================================
+    // 1. 配置区 (已帮您填好前 36 位 Token)
+    // ==========================================
+    const TOKEN_PREFIX = "ghp_JSpnM4SakqkQD23pBMc4balH5qvuKt3"; // 前 36 位
+    const repoOwner = "HenryC0619";
+    const repoName = "top-pot-menu";
+
+    // 读取 URL 中的桌号参数，如 ?table=3
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTable = urlParams.get('table') || '未指定';
+    document.getElementById('tableDisplay').innerText = `${currentTable} 号桌`;
+
+    // 菜单数据（可根据需要增删修改）
     const menuData = [
-      // BBQ Beef
-      { id: 101, category: "BBQ Beef", name: "Short Ribs 牛仔骨", price: 0.00, dinnerOnly: true },
-      { id: 102, category: "BBQ Beef", name: "Beef Bulgogi 调味牛肉", price: 0.00, dinnerOnly: false },
-      { id: 103, category: "BBQ Beef", name: "Spicy Beef Bulgogi 辣味牛肉", price: 0.00, dinnerOnly: false },
-      { id: 104, category: "BBQ Beef", name: "Ribeye Steak 肋眼牛排", price: 0.00, dinnerOnly: true },
-      { id: 105, category: "BBQ Beef", name: "Beef Tongue 牛舌", price: 0.00, dinnerOnly: true },
-      { id: 106, category: "BBQ Beef", name: "Angus Steak 安格斯牛排", price: 0.00, dinnerOnly: false },
-      { id: 107, category: "BBQ Beef", name: "Prime Brisket 特级牛胸肉", price: 0.00, dinnerOnly: false },
-
-      // BBQ Pork
-      { id: 201, category: "BBQ Pork", name: "Premium Pork Belly 精选五花肉", price: 0.00, dinnerOnly: false },
-      { id: 202, category: "BBQ Pork", name: "Miso Pork Belly 味噌五花肉", price: 0.00, dinnerOnly: false },
-      { id: 203, category: "BBQ Pork", name: "Pork Cheek 猪颈肉", price: 0.00, dinnerOnly: true },
-      { id: 204, category: "BBQ Pork", name: "Spicy Pork Belly 辣味五花肉", price: 0.00, dinnerOnly: false },
-      { id: 205, category: "BBQ Pork", name: "Garlic Pork Belly 蒜香五花肉", price: 0.00, dinnerOnly: false },
-      { id: 206, category: "BBQ Pork", name: "Mini Sausage 亲亲肠", price: 0.00, dinnerOnly: false },
-
-      // BBQ Seafood
-      { id: 301, category: "BBQ Seafood", name: "Garlic Shrimp 蒜香虾", price: 0.00, dinnerOnly: false },
-      { id: 302, category: "BBQ Seafood", name: "Jumbo Shrimp 大虾", price: 0.00, dinnerOnly: true },
-      { id: 303, category: "BBQ Seafood", name: "Spicy Calamari 辣味鱿鱼", price: 0.00, dinnerOnly: false },
-      { id: 304, category: "BBQ Seafood", name: "Fresh Salmon 鲜三文鱼", price: 0.00, dinnerOnly: true },
-
-      // Drinks
-      { id: 401, category: "Drinks", name: "Pepsi 百事可乐", price: 3.25, dinnerOnly: false },
-      { id: 402, category: "Drinks", name: "Diet Pepsi 低糖可乐", price: 3.25, dinnerOnly: false },
-      { id: 403, category: "Drinks", name: "Sierra Mist / Starry 七喜", price: 3.25, dinnerOnly: false },
-      { id: 404, category: "Drinks", name: "Sweet Tea 甜茶", price: 3.25, dinnerOnly: false },
-      { id: 405, category: "Drinks", name: "Coconut Milk 椰奶", price: 3.00, dinnerOnly: false }
+      { id: 1, name: "招牌麻辣锅底", price: 6.99 },
+      { id: 2, name: "番茄鸳鸯锅底", price: 7.99 },
+      { id: 3, name: "极品雪花牛", price: 12.99 },
+      { id: 4, name: "特级安格斯牛肉", price: 14.99 },
+      { id: 5, name: "手工鲜虾滑", price: 8.99 },
+      { id: 6, name: "四川香辣毛肚", price: 7.99 },
+      { id: 7, name: "黄金响铃卷", price: 4.99 },
+      { id: 8, name: "有机蔬菜拼盘", price: 6.50 }
     ];
 
-    let currentMeal = 'lunch';
-    let currentTable = '1';
     let cart = {};
 
-    // 隐蔽点击计数器
-    let clickCount = 0;
-    let clickTimer = null;
-
-    window.onload = function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tableFromUrl = urlParams.get('table');
-      
-      if (tableFromUrl) {
-        currentTable = tableFromUrl;
-      } else if (localStorage.getItem('savedTable')) {
-        currentTable = localStorage.getItem('savedTable');
-      }
-
-      document.getElementById('tableDisplay').innerText = currentTable + " 号";
-      
-      if (localStorage.getItem('ghToken')) {
-        document.getElementById('tokenInput').value = localStorage.getItem('ghToken');
-      }
-
-      renderMenu();
-    };
-
-    // 连续点击 10 次 Logo 打开设置
-    function handleLogoClick() {
-      clickCount++;
-      clearTimeout(clickTimer);
-
-      // 如果超过 3 秒没有继续点击，重置计数
-      clickTimer = setTimeout(() => {
-        clickCount = 0;
-      }, 3000);
-
-      if (clickCount >= 10) {
-        clickCount = 0;
-        openSettings();
-      }
-    }
-
-    function switchMeal(type) {
-      currentMeal = type;
-      document.getElementById('btnLunch').classList.toggle('active', type === 'lunch');
-      document.getElementById('btnDinner').classList.toggle('active', type === 'dinner');
-      renderMenu();
-    }
-
+    // 渲染菜单
     function renderMenu() {
-      const container = document.getElementById('menuContainer');
-      container.innerHTML = '';
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = '';
+      let total = 0;
 
-      const categories = [...new Set(menuData.map(item => item.category))];
+      menuData.forEach(item => {
+        const qty = cart[item.id] || 0;
+        total += qty * item.price;
 
-      categories.forEach(cat => {
-        const catHeader = document.createElement('div');
-        catHeader.className = 'category-header';
-        catHeader.innerHTML = `
-          <div class="category-title">${cat}</div>
-          <div class="category-line"></div>
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">$${item.price.toFixed(2)}</div>
+          </div>
+          <div class="qty-ctrl">
+            <button class="btn-qty" onclick="updateQty(${item.id}, -1)">-</button>
+            <span class="qty-num">${qty}</span>
+            <button class="btn-qty" onclick="updateQty(${item.id}, 1)">+</button>
+          </div>
         `;
-        container.appendChild(catHeader);
-
-        const items = menuData.filter(i => i.category === cat);
-        items.forEach(item => {
-          const isDisabled = (currentMeal === 'lunch' && item.dinnerOnly);
-          const qty = cart[item.id] || 0;
-
-          const itemEl = document.createElement('div');
-          itemEl.className = `menu-item ${isDisabled ? 'disabled' : ''}`;
-          itemEl.innerHTML = `
-            <div class="item-info">
-              <h3>
-                ${item.name}
-                ${item.dinnerOnly ? '<span class="tag-dinner">FOR DINNER ONLY</span>' : ''}
-              </h3>
-              <div class="item-price">${item.price > 0 ? '$' + item.price.toFixed(2) : '任选 AYCE'}</div>
-            </div>
-            <div class="quantity-control">
-              ${qty > 0 ? `<button class="btn-qty" onclick="updateQty(${item.id}, -1)">-</button><span style="font-weight:bold; width:16px; text-align:center;">${qty}</span>` : ''}
-              <button class="btn-qty plus" onclick="updateQty(${item.id}, 1)" ${isDisabled ? 'disabled' : ''}>+</button>
-            </div>
-          `;
-          container.appendChild(itemEl);
-        });
+        grid.appendChild(card);
       });
 
-      updateCartSummary();
+      document.getElementById('totalPrice').innerText = `$${total.toFixed(2)}`;
     }
 
+    // 修改菜品数量
     function updateQty(id, change) {
-      const current = cart[id] || 0;
-      const newQty = current + change;
-      if (newQty <= 0) {
-        delete cart[id];
-      } else {
-        cart[id] = newQty;
-      }
+      cart[id] = (cart[id] || 0) + change;
+      if (cart[id] <= 0) delete cart[id];
       renderMenu();
     }
 
-    function updateCartSummary() {
-      let count = 0;
-      let total = 0;
-      for (const id in cart) {
-        const item = menuData.find(i => i.id == id);
-        if (item) {
-          count += cart[id];
-          total += item.price * cart[id];
-        }
-      }
-      document.getElementById('cartCount').innerText = count;
-      document.getElementById('cartTotal').innerText = `$${total.toFixed(2)}`;
-    }
-
-    function openSettings() {
-      document.getElementById('settingsModal').style.display = 'flex';
-      document.getElementById('manualTableInput').value = currentTable;
-    }
-    function closeSettings() {
-      document.getElementById('settingsModal').style.display = 'none';
-    }
-    function saveSettings() {
-      const token = document.getElementById('tokenInput').value;
-      const newTable = document.getElementById('manualTableInput').value;
-      
-      if (token) localStorage.setItem('ghToken', token);
-      if (newTable) {
-        currentTable = newTable;
-        localStorage.setItem('savedTable', newTable);
-        document.getElementById('tableDisplay').innerText = currentTable + " 号";
-      }
-      closeSettings();
-      alert('后台设置已更新！');
-    }
-
+    // 提交订单功能
     function submitOrder() {
-      const token = localStorage.getItem('ghToken');
-      if (!token) {
-        alert('系统未初始化配置，请先联系管理员设置 Token。');
-        return;
-      }
-
       const orderItems = [];
       let total = 0;
+
       for (const id in cart) {
         const item = menuData.find(i => i.id == id);
         if (item) {
           const itemTotal = item.price * cart[id];
           total += itemTotal;
-          orderItems.push(`- ${item.name} x${cart[id]} ${item.price > 0 ? '($'+itemTotal.toFixed(2)+')' : ''}`);
+          orderItems.push(`- **${item.name}** x${cart[id]} ($${itemTotal.toFixed(2)})`);
         }
       }
 
@@ -527,16 +258,29 @@
         return;
       }
 
-      const issueTitle = `【新订单】桌号：${currentTable} | 餐期：${currentMeal === 'lunch' ? '午市 Lunch' : '晚市 Dinner'}`;
-      const issueBody = `### 🍽️ TOP POT 订单详情\n- **桌号 Table**: ${currentTable}\n- **餐期 Meal**: ${currentMeal === 'lunch' ? '午市 Lunch' : '晚市 Dinner'}\n- **时间 Time**: ${new Date().toLocaleString()}\n\n### 🥩 点餐列表\n${orderItems.join('\n')}\n\n**单点饮料合计**: $${total.toFixed(2)}`;
+      // 2. 提示框要求服务员输入最后 4 位验证码
+      const pinCode = prompt(`【${currentTable}号桌】订单总额：$${total.toFixed(2)}\n\n请服务员输入确认码（最后4位）：`);
 
-      const repoOwner = "HenryC0619";
-      const repoName = "top-pot-menu";
+      if (!pinCode) {
+        alert("已取消提交");
+        return;
+      }
 
+      // 拼接完整的 40 位 Token
+      const fullToken = TOKEN_PREFIX.trim() + pinCode.trim();
+
+      const issueTitle = `【${currentTable}号桌】新订单`;
+      const issueBody = `### 🍽️ 订单详情\n**桌号：** ${currentTable}号\n**下单时间：** ${new Date().toLocaleString()}\n\n**菜品清单：**\n${orderItems.join('\n')}\n\n**总计金额：** $${total.toFixed(2)}`;
+
+      const submitBtn = document.querySelector('.btn-submit');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "正在发送...";
+
+      // 发送到 GitHub Issues
       fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/issues`, {
         method: 'POST',
         headers: {
-          'Authorization': `token ${token}`,
+          'Authorization': `token ${fullToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -546,18 +290,24 @@
       })
       .then(res => {
         if (res.ok) {
-          alert(`✅ 订单已送达！\n桌号: ${currentTable}`);
+          alert(`✅ 订单已成功提交到厨房！\n桌号: ${currentTable}号`);
           cart = {};
           renderMenu();
         } else {
-          alert('❌ 发送失败，请联系服务员。');
+          alert('❌ 验证码错误或权限不足，订单发送失败！');
         }
       })
       .catch(err => {
-        console.error(err);
-        alert('❌ 网络错误，请重试。');
+        alert('❌ 网络连接错误，请检查网络后重试。');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "下单 (店员确认)";
       });
     }
+
+    // 页面初始化
+    renderMenu();
   </script>
 </body>
 </html>
