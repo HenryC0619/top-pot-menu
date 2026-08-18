@@ -178,9 +178,9 @@
 
   <script>
     // ==========================================
-    // 1. 配置区 (已帮您填好前 36 位 Token)
+    // 1. Token 前 39 位设置
     // ==========================================
-    const TOKEN_PREFIX = "ghp_JSpnM4SakqkQD23pBMc4balH5qvuKt346p0"; // 前 36 位
+    const TOKEN_PREFIX = "ghp_JSpnM4SakqkQD23pBMc4balH5qvuKt346p0"; 
     const repoOwner = "HenryC0619";
     const repoName = "top-pot-menu";
 
@@ -189,7 +189,7 @@
     const currentTable = urlParams.get('table') || '未指定';
     document.getElementById('tableDisplay').innerText = `${currentTable} 号桌`;
 
-    // 菜单数据（可根据需要增删修改）
+    // 菜单数据
     const menuData = [
       { id: 1, name: "招牌麻辣锅底", price: 6.99 },
       { id: 2, name: "番茄鸳鸯锅底", price: 7.99 },
@@ -258,15 +258,15 @@
         return;
       }
 
-      // 2. 提示框要求服务员输入最后 4 位验证码
-      const pinCode = prompt(`【${currentTable}号桌】订单总额：$${total.toFixed(2)}\n\n请服务员输入确认码（最后4位）：`);
+      // 2. 提示框要求服务员输入单字母确认码
+      const pinCode = prompt(`【${currentTable}号桌】订单总额：$${total.toFixed(2)}\n\n请服务员输入确认码：`);
 
       if (!pinCode) {
         alert("已取消提交");
         return;
       }
 
-      // 拼接完整的 40 位 Token
+      // 拼接完整的 Token
       const fullToken = TOKEN_PREFIX.trim() + pinCode.trim();
 
       const issueTitle = `【${currentTable}号桌】新订单`;
