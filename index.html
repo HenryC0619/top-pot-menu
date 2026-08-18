@@ -529,7 +529,7 @@
       const issueBody = `### 🍽️ TOP POT 订单详情\n- **桌号 Table**: ${currentTable}\n- **餐期 Meal**: ${currentMeal === 'lunch' ? '午市 Lunch' : '晚市 Dinner'}\n- **时间 Time**: ${new Date().toLocaleString()}\n\n### 🥩 点餐列表\n${orderItems.join('\n')}\n\n**单点饮料合计**: $${total.toFixed(2)}`;
 
       const repoOwner = "HenryC0619";
-      const repoName = "tp-menu";
+      const repoName = "top-pot-menu";
 
       fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/issues`, {
         method: 'POST',
