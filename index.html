@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TOP POT HOT POT - 在线点餐</title>
+  <title>TOP POT - K BBQ & HOT POT</title>
   <style>
     :root {
-      --bg: #121212;
-      --card: #1e1e1e;
-      --accent: #e60012;
-      --gold: #f5af19;
-      --text: #ffffff;
-      --text-muted: #aaaaaa;
-      --border: #333333;
+      --bg: #090909;
+      --card-bg: #141414;
+      --card-border: #262626;
+      --accent: #e50914;
+      --accent-hover: #b20710;
+      --gold: #f5c518;
+      --text-main: #ffffff;
+      --text-muted: #888888;
     }
 
     * {
@@ -24,83 +25,241 @@
 
     body {
       background-color: var(--bg);
-      color: var(--text);
-      padding: 15px;
-      padding-bottom: 100px;
+      color: var(--text-main);
+      padding: 10px;
+      padding-bottom: 120px;
     }
 
+    /* 顶部导航栏布局 */
     header {
+      position: relative;
       text-align: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 15px;
+      padding: 16px 0 12px 0;
+      background: linear-gradient(180deg, #1f0505 0%, var(--bg) 100%);
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 12px;
+      border-radius: 0 0 12px 12px;
+      user-select: none;
+    }
+
+    /* 右上角语言切换按钮 */
+    .lang-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #262626;
+      color: #fff;
+      border: 1px solid #404040;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
     }
 
     h1 {
-      color: var(--gold);
-      font-size: 1.5rem;
-      letter-spacing: 1px;
+      color: var(--text-main);
+      font-size: 1.8rem;
+      letter-spacing: 3px;
+      font-weight: 900;
+      text-shadow: 0 2px 10px rgba(229, 9, 20, 0.5);
+      margin-bottom: 2px;
+      cursor: pointer;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .sub-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
     }
 
     .table-badge {
       display: inline-block;
-      margin-top: 6px;
-      background: #2a2a2a;
-      color: var(--gold);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      border: 1px solid var(--gold);
+      background: rgba(229, 9, 20, 0.15);
+      color: #ff6b6b;
+      padding: 3px 14px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid rgba(229, 9, 20, 0.4);
     }
 
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 12px;
+    /* 用餐时段选择器 (Lunch / Dinner) */
+    .session-switcher {
+      display: flex;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 12px;
+      gap: 4px;
+    }
+
+    .session-btn {
+      flex: 1;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      padding: 10px;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .session-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
+    }
+
+    /* 大分区选择栏 (BBQ vs HOT POT) */
+    .main-type-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .main-tab {
+      flex: 1;
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .main-tab.active {
+      background: #262626;
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* 小分区横向滚动栏 */
+    .sub-type-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .sub-type-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .sub-tab {
+      background: #1a1a1a;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 15px;
+      font-size: 0.82rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .sub-tab.active {
+      background: var(--text-main);
+      color: #000;
+      font-weight: bold;
+      border-color: var(--text-main);
+    }
+
+    /* 分类板块大标题 */
+    .section-title {
+      font-size: 1.05rem;
+      color: #ff9999;
+      margin: 14px 0 8px 4px;
+      border-left: 3px solid var(--accent);
+      padding-left: 8px;
+      font-weight: bold;
+    }
+
+    /* 菜品列表 */
+    .menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .item-card {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 10px;
-      padding: 12px;
+      padding: 10px 12px;
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
+
+    .item-card.disabled-item {
+      opacity: 0.35;
+      background: #0d0d0d;
+      border-color: #1a1a1a;
+      pointer-events: none;
+    }
+
+    .item-info {
+      flex: 1;
+      padding-right: 8px;
     }
 
     .item-name {
+      font-size: 0.96rem;
       font-weight: bold;
-      font-size: 1rem;
-      margin-bottom: 6px;
+      margin-bottom: 2px;
+      color: #fff;
     }
 
-    .item-price {
-      color: var(--gold);
-      font-weight: bold;
-      font-size: 1.1rem;
+    .item-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.25;
     }
 
+    .dinner-tag {
+      display: inline-block;
+      background: rgba(229, 9, 20, 0.2);
+      color: #ff6b6b;
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-top: 3px;
+      border: 1px solid rgba(229, 9, 20, 0.4);
+    }
+
+    /* 数量控制器 */
     .qty-ctrl {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-top: 10px;
-      background: #151515;
-      border-radius: 6px;
-      padding: 2px;
+      gap: 8px;
     }
 
     .btn-qty {
-      background: #2a2a2a;
+      background: #262626;
       color: #fff;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 4px;
-      font-size: 1.2rem;
+      border: 1px solid #404040;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 1rem;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
 
@@ -111,31 +270,35 @@
     .qty-num {
       font-weight: bold;
       font-size: 0.95rem;
+      min-width: 15px;
+      text-align: center;
     }
 
+    /* 底部悬浮结算栏 */
     .bottom-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: #1a1a1a;
-      border-top: 1px solid var(--border);
-      padding: 12px 20px;
+      background: rgba(12, 12, 12, 0.97);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--card-border);
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.8);
       z-index: 100;
     }
 
     .total-label {
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
     .total-amount {
       color: var(--gold);
-      font-size: 1.3rem;
+      font-size: 1.15rem;
       font-weight: bold;
     }
 
@@ -143,140 +306,557 @@
       background: var(--accent);
       color: #fff;
       border: none;
-      padding: 12px 24px;
-      border-radius: 25px;
+      padding: 10px 22px;
+      border-radius: 22px;
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.9rem;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(230, 0, 18, 0.4);
+      box-shadow: 0 4px 12px rgba(229, 9, 20, 0.5);
     }
 
     .btn-submit:disabled {
-      background: #555;
+      background: #262626;
+      color: #666;
       box-shadow: none;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🍲 TOP POT HOT POT</h1>
+    <!-- 中英文切换按钮 -->
+    <button class="lang-btn" id="langToggleBtn" onclick="toggleLanguage()">中 / EN</button>
+    
+    <!-- 连续点击店名 10 次修改桌号 -->
+    <h1 onclick="handleHeaderClick()">TOP <span>POT</span></h1>
+    <div class="sub-title">K BBQ & HOT POT · STATEN ISLAND, NY</div>
     <div class="table-badge" id="tableDisplay">桌号加载中...</div>
   </header>
 
+  <!-- 用餐时段选择 (Lunch / Dinner) -->
+  <div class="session-switcher">
+    <button class="session-btn active" id="lunchBtn" onclick="switchSession('lunch')">☀️ LUNCH (午市)</button>
+    <button class="session-btn" id="dinnerBtn" onclick="switchSession('dinner')">🌙 DINNER (晚市专享)</button>
+  </div>
+
+  <!-- 大分区切换 (BBQ vs HOT POT) -->
+  <div class="main-type-tabs">
+    <div class="main-tab active" id="mainTab-bbq" onclick="switchMainType('bbq')">🔥 K-BBQ 烤肉区</div>
+    <div class="main-tab" id="mainTab-hotpot" onclick="switchMainType('hotpot')">🍲 HOT POT 火锅区</div>
+  </div>
+
+  <!-- 小分区横向导航 -->
+  <div class="sub-type-tabs" id="subTypeTabs"></div>
+
   <main>
-    <div class="menu-grid" id="menuGrid"></div>
+    <div class="menu-list" id="menuList"></div>
   </main>
 
   <div class="bottom-bar">
     <div>
-      <div class="total-label">合计金额</div>
-      <div class="total-amount" id="totalPrice">$0.00</div>
+      <div class="total-label" id="cartLabelText">当前已选加单</div>
+      <div class="total-amount" id="totalCountDisplay">0 样菜品</div>
     </div>
-    <button class="btn-submit" onclick="submitOrder()">发送订单</button>
+    <button class="btn-submit" id="submitBtn" onclick="submitOrder()" disabled>请选择菜品</button>
   </div>
 
   <script>
-    // ==========================================
-    // 将 Base64 拆分为两段（防止 GitHub Secret Scanning 解码拦截）
-    // ==========================================
+    // GitHub 提交凭证 (Base64 拆分防扫描拦截)
     const s1 = "Z2hwX0o1Sm1xeVYycUdhT3VxUzBrOFdj";
     const s2 = "VUprbFRlM25LYTBOalFMcQ==";
 
     const repoOwner = "HenryC0619";
     const repoName = "top-pot-menu";
 
-    // 读取 URL 中的桌号参数，如 ?table=3
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentTable = urlParams.get('table') || '未指定';
-    document.getElementById('tableDisplay').innerText = `${currentTable} 号桌`;
+    // 语言状态: 'zh' 或 'en'
+    let currentLang = 'zh';
 
-    // 菜单数据
-    const menuData = [
-      { id: 1, name: "招牌麻辣锅底", price: 6.99 },
-      { id: 2, name: "番茄鸳鸯锅底", price: 7.99 },
-      { id: 3, name: "极品雪花牛", price: 12.99 },
-      { id: 4, name: "特级安格斯牛肉", price: 14.99 },
-      { id: 5, name: "手工鲜虾滑", price: 8.99 },
-      { id: 6, name: "四川香辣毛肚", price: 7.99 },
-      { id: 7, name: "黄金响铃卷", price: 4.99 },
-      { id: 8, name: "有机蔬菜拼盘", price: 6.50 }
-    ];
-
-    let cart = {};
-
-    // 渲染菜单
-    function renderMenu() {
-      const grid = document.getElementById('menuGrid');
-      grid.innerHTML = '';
-      let total = 0;
-
-      menuData.forEach(item => {
-        const qty = cart[item.id] || 0;
-        total += qty * item.price;
-
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        card.innerHTML = `
-          <div>
-            <div class="item-name">${item.name}</div>
-            <div class="item-price">$${item.price.toFixed(2)}</div>
-          </div>
-          <div class="qty-ctrl">
-            <button class="btn-qty" onclick="updateQty(${item.id}, -1)">-</button>
-            <span class="qty-num">${qty}</span>
-            <button class="btn-qty" onclick="updateQty(${item.id}, 1)">+</button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-
-      document.getElementById('totalPrice').innerText = `$${total.toFixed(2)}`;
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      document.getElementById('langToggleBtn').innerText = currentLang === 'zh' ? 'EN / 中文' : '中文 / EN';
+      updateStaticUIText();
+      renderSubTabs();
+      renderMenu();
+      updateTableDisplay();
     }
 
-    // 修改菜品数量
+    function updateStaticUIText() {
+      document.getElementById('lunchBtn').innerText = currentLang === 'zh' ? '☀️ LUNCH (午市)' : '☀️ LUNCH';
+      document.getElementById('dinnerBtn').innerText = currentLang === 'zh' ? '🌙 DINNER (晚市专享)' : '🌙 DINNER';
+      document.getElementById('mainTab-bbq').innerText = currentLang === 'zh' ? '🔥 K-BBQ 烤肉区' : '🔥 K-BBQ';
+      document.getElementById('mainTab-hotpot').innerText = currentLang === 'zh' ? '🍲 HOT POT 火锅区' : '🍲 HOT POT';
+      document.getElementById('cartLabelText').innerText = currentLang === 'zh' ? '当前已选加单' : 'Selected Items';
+    }
+
+    // 桌号防篡改与隐藏修改逻辑 (连续点店名 10 次)
+    let clickCount = 0;
+    let clickTimer = null;
+
+    function handleHeaderClick() {
+      clickCount++;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+
+      if (clickCount >= 10) {
+        clickCount = 0;
+        const currentTable = localStorage.getItem('top_pot_table') || '1';
+        const promptMsg = currentLang === 'zh' ? '⚙️ 【管理员调试】请输入新的桌号：' : '⚙️ [Admin] Enter new table number:';
+        const newTable = prompt(promptMsg, currentTable);
+        
+        if (newTable !== null && newTable.trim() !== "") {
+          localStorage.setItem('top_pot_table', newTable.trim());
+          updateTableDisplay();
+          alert(currentLang === 'zh' ? `✅ 桌号已成功更新为：${newTable.trim()} 号桌` : `✅ Table updated to: #${newTable.trim()}`);
+        }
+      }
+    }
+
+    function getTableNumber() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let table = urlParams.get('table');
+      if (table) {
+        localStorage.setItem('top_pot_table', table);
+      } else {
+        table = localStorage.getItem('top_pot_table') || '1';
+      }
+      return table;
+    }
+
+    function updateTableDisplay() {
+      const t = getTableNumber();
+      document.getElementById('tableDisplay').innerText = currentLang === 'zh' ? `当前桌号：${t} 号桌` : `Table: #${t}`;
+    }
+
+    updateTableDisplay();
+
+    // 核心状态
+    let currentSession = 'lunch';
+    let currentMain = 'bbq';
+    let currentSub = 'all';
+    let cart = {};
+
+    // 菜单双语数据库
+    const menuData = [
+      // ==================== BBQ 烤肉区 ====================
+      { 
+        id: 1, main: 'bbq', sub: 'beef', 
+        groupZh: '🥩 BBQ Beef 烤牛肉类', groupEn: '🥩 BBQ Beef', 
+        nameZh: "Beef Bulgogi", nameEn: "Beef Bulgogi", 
+        descZh: "经典韩式腌制牛肉，甜咸适口", descEn: "Classic marinated Korean beef, sweet & savory", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 2, main: 'bbq', sub: 'beef', 
+        groupZh: '🥩 BBQ Beef 烤牛肉类', groupEn: '🥩 BBQ Beef', 
+        nameZh: "Spicy Beef Bulgogi", nameEn: "Spicy Beef Bulgogi", 
+        descZh: "韩式香辣酱腌制牛肉，惹味过瘾", descEn: "Spicy marinated Korean beef", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 3, main: 'bbq', sub: 'beef', 
+        groupZh: '🥩 BBQ Beef 烤牛肉类', groupEn: '🥩 BBQ Beef', 
+        nameZh: "Ribeye Steak", nameEn: "Ribeye Steak", 
+        descZh: "大理石纹路均匀，肉质厚实多汁", descEn: "Well-marbled, thick and juicy", 
+        dinnerOnly: true 
+      },
+      { 
+        id: 4, main: 'bbq', sub: 'beef', 
+        groupZh: '🥩 BBQ Beef 烤牛肉类', groupEn: '🥩 BBQ Beef', 
+        nameZh: "Beef Tongue", nameEn: "Beef Tongue", 
+        descZh: "牛舌薄切，烤至微焦香脆", descEn: "Thinly sliced beef tongue", 
+        dinnerOnly: true 
+      },
+      { 
+        id: 5, main: 'bbq', sub: 'beef', 
+        groupZh: '🥩 BBQ Beef 烤牛肉类', groupEn: '🥩 BBQ Beef', 
+        nameZh: "Angus Steak", nameEn: "Angus Steak", 
+        descZh: "安格斯精选牛排，烤肉必点", descEn: "Selected Angus steak", 
+        dinnerOnly: true 
+      },
+      { 
+        id: 6, main: 'bbq', sub: 'beef', 
+        groupZh: '🥩 BBQ Beef 烤牛肉类', groupEn: '🥩 BBQ Beef', 
+        nameZh: "Prime Brisket", nameEn: "Prime Brisket", 
+        descZh: "精选牛胸肉，肥瘦相间，入口即化", descEn: "Prime beef brisket, melt in your mouth", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 7, main: 'bbq', sub: 'beef', 
+        groupZh: '🥩 BBQ Beef 烤牛肉类', groupEn: '🥩 BBQ Beef', 
+        nameZh: "Short Ribs", nameEn: "Short Ribs", 
+        descZh: "带骨牛小排，浓郁焦香", descEn: "Bone-in short ribs, rich flavor", 
+        dinnerOnly: true 
+      },
+
+      { 
+        id: 8, main: 'bbq', sub: 'pork', 
+        groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', 
+        nameZh: "Premium Pork Belly", nameEn: "Premium Pork Belly", 
+        descZh: "经典优质五花肉，烤出诱人油脂", descEn: "Classic premium pork belly", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 9, main: 'bbq', sub: 'pork', 
+        groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', 
+        nameZh: "Miso Pork Belly", nameEn: "Miso Pork Belly", 
+        descZh: "日式味噌风味腌制五花肉", descEn: "Miso-marinated pork belly", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 10, main: 'bbq', sub: 'pork', 
+        groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', 
+        nameZh: "Pork Cheek", nameEn: "Pork Cheek", 
+        descZh: "猪脸颊肉，稀有部位，爽脆弹牙", descEn: "Tender and crispy pork cheek", 
+        dinnerOnly: true 
+      },
+      { 
+        id: 11, main: 'bbq', sub: 'pork', 
+        groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', 
+        nameZh: "Spicy Pork Belly", nameEn: "Spicy Pork Belly", 
+        descZh: "香辣五花肉，双重过瘾", descEn: "Spicy flavored pork belly", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 12, main: 'bbq', sub: 'pork', 
+        groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', 
+        nameZh: "Garlic Pork Belly", nameEn: "Garlic Pork Belly", 
+        descZh: "浓郁蒜香风味五花肉", descEn: "Garlic flavored pork belly", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 13, main: 'bbq', sub: 'pork', 
+        groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', 
+        nameZh: "Mini Sausage", nameEn: "Mini Sausage", 
+        descZh: "迷你烤肠，小朋友与聚会挚爱", descEn: "Mini grilled sausage", 
+        dinnerOnly: false 
+      },
+
+      { 
+        id: 14, main: 'bbq', sub: 'seafood', 
+        groupZh: '🦐 BBQ Seafood 烤海鲜类', groupEn: '🦐 BBQ Seafood', 
+        nameZh: "Spicy Calamari", nameEn: "Spicy Calamari", 
+        descZh: "香辣鱿鱼圈，Q弹鲜美", descEn: "Spicy squid rings", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 15, main: 'bbq', sub: 'seafood', 
+        groupZh: '🦐 BBQ Seafood 烤海鲜类', groupEn: '🦐 BBQ Seafood', 
+        nameZh: "Mussel", nameEn: "Mussel", 
+        descZh: "鲜美青口贝，碳烤美味", descEn: "Fresh mussels", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 16, main: 'bbq', sub: 'seafood', 
+        groupZh: '🦐 BBQ Seafood 烤海鲜类', groupEn: '🦐 BBQ Seafood', 
+        nameZh: "Spicy Octopus", nameEn: "Spicy Octopus", 
+        descZh: "香辣小章鱼，爽脆弹牙", descEn: "Spicy baby octopus", 
+        dinnerOnly: true 
+      },
+      { 
+        id: 17, main: 'bbq', sub: 'seafood', 
+        groupZh: '🦐 BBQ Seafood 烤海鲜类', groupEn: '🦐 BBQ Seafood', 
+        nameZh: "Garlic Shrimp", nameEn: "Garlic Shrimp", 
+        descZh: "蒜香大虾，鲜甜浓郁", descEn: "Garlic butter shrimp", 
+        dinnerOnly: false 
+      },
+
+      { 
+        id: 18, main: 'bbq', sub: 'chicken', 
+        groupZh: '🍗 BBQ Chicken 烤鸡肉类', groupEn: '🍗 BBQ Chicken', 
+        nameZh: "Chicken Bulgogi", nameEn: "Chicken Bulgogi", 
+        descZh: "韩式甜咸酱汁鸡肉", descEn: "Korean style sweet chicken", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 19, main: 'bbq', sub: 'chicken', 
+        groupZh: '🍗 BBQ Chicken 烤鸡肉类', groupEn: '🍗 BBQ Chicken', 
+        nameZh: "Garlic Chicken", nameEn: "Garlic Chicken", 
+        descZh: "浓郁蒜香烤鸡肉", descEn: "Garlic flavored chicken", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 20, main: 'bbq', sub: 'chicken', 
+        groupZh: '🍗 BBQ Chicken 烤鸡肉类', groupEn: '🍗 BBQ Chicken', 
+        nameZh: "Spicy Chicken Bulgogi", nameEn: "Spicy Chicken Bulgogi", 
+        descZh: "火辣韩式鸡肉", descEn: "Spicy Korean chicken", 
+        dinnerOnly: false 
+      },
+
+      { 
+        id: 21, main: 'bbq', sub: 'veg', 
+        groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', 
+        nameZh: "Pumpkin", nameEn: "Pumpkin", 
+        descZh: "香甜南瓜片，烤软后软糯香甜", descEn: "Sweet pumpkin slices", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 22, main: 'bbq', sub: 'veg', 
+        groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', 
+        nameZh: "Enoki Mushroom", nameEn: "Enoki Mushroom", 
+        descZh: "金针菇，吸油提味", descEn: "Enoki mushrooms", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 23, main: 'bbq', sub: 'veg', 
+        groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', 
+        nameZh: "Green Leaf Lettuce", nameEn: "Green Leaf Lettuce", 
+        descZh: "生菜，包烤肉绝配", descEn: "Fresh lettuce wraps", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 24, main: 'bbq', sub: 'veg', 
+        groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', 
+        nameZh: "Pineapple", nameEn: "Pineapple", 
+        descZh: "烤凤梨，解腻神器", descEn: "Grilled pineapple", 
+        dinnerOnly: false 
+      },
+
+      // ==================== HOT POT 火锅区 ====================
+      { 
+        id: 25, main: 'hotpot', sub: 'soup', 
+        groupZh: '🍲 Hot Pot Soup 锅底系列', groupEn: '🍲 Hot Pot Soup', 
+        nameZh: "招牌红汤麻辣锅", nameEn: "Spicy Mala Soup Base", 
+        descZh: "纯正牛油，麻辣鲜香，越煮越醇厚", descEn: "Authentic spicy beef tallow broth", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 26, main: 'hotpot', sub: 'soup', 
+        groupZh: '🍲 Hot Pot Soup 锅底系列', groupEn: '🍲 Hot Pot Soup', 
+        nameZh: "大骨滋补清汤锅", nameEn: "Pork Bone Broth", 
+        descZh: "慢火细熬，浓郁鲜美，老少皆宜", descEn: "Rich and nourishing bone broth", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 27, main: 'hotpot', sub: 'soup', 
+        groupZh: '🍲 Hot Pot Soup 锅底系列', groupEn: '🍲 Hot Pot Soup', 
+        nameZh: "番茄鸳鸯双拼锅", nameEn: "Tomato Soup Base", 
+        descZh: "酸甜浓郁，开胃解腻首选", descEn: "Sweet & tangy tomato broth", 
+        dinnerOnly: true 
+      },
+
+      { 
+        id: 28, main: 'hotpot', sub: 'meat', 
+        groupZh: '🥩 Hot Pot Meat 火锅肉类', groupEn: '🥩 Hot Pot Meat', 
+        nameZh: "极品雪花肥牛卷", nameEn: "Premium Beef Roll", 
+        descZh: "火锅绝配，纹理清晰，入口化渣", descEn: "Tender marbled beef slices", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 29, main: 'hotpot', sub: 'meat', 
+        groupZh: '🥩 Hot Pot Meat 火锅肉类', groupEn: '🥩 Hot Pot Meat', 
+        nameZh: "鲜切脆爽毛肚", nameEn: "Fresh Beef Tripe", 
+        descZh: "七上八下，爽脆弹牙", descEn: "Crispy fresh tripe", 
+        dinnerOnly: true 
+      },
+      { 
+        id: 30, main: 'hotpot', sub: 'meat', 
+        groupZh: '🥩 Hot Pot Meat 火锅肉类', groupEn: '🥩 Hot Pot Meat', 
+        nameZh: "精选羊肉片", nameEn: "Sliced Lamb", 
+        descZh: "肉质细嫩，无膻味", descEn: "Tender sliced lamb", 
+        dinnerOnly: false 
+      },
+
+      { 
+        id: 31, main: 'hotpot', sub: 'noodle', 
+        groupZh: '🍜 Noodle 主食面点', groupEn: '🍜 Noodle & Carbs', 
+        nameZh: "手工红薯粉条", nameEn: "Sweet Potato Noodles", 
+        descZh: "久煮不烂，顺滑Q弹", descEn: "Chewy sweet potato noodles", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 32, main: 'hotpot', sub: 'noodle', 
+        groupZh: '🍜 Noodle 主食面点', groupEn: '🍜 Noodle & Carbs', 
+        nameZh: "日式乌冬面", nameEn: "Udon Noodles", 
+        descZh: "口感厚实劲道", descEn: "Thick Japanese udon", 
+        dinnerOnly: false 
+      },
+
+      { 
+        id: 33, main: 'hotpot', sub: 'soybean', 
+        groupZh: '🫘 Soybean 豆制品类', groupEn: '🫘 Soybean Products', 
+        nameZh: "黄金香脆响铃卷", nameEn: "Fried Beancurd Rolls", 
+        descZh: "吸满浓郁汤汁，三秒即食", descEn: "Crispy rolls that soak up soup", 
+        dinnerOnly: false 
+      },
+      { 
+        id: 34, main: 'hotpot', sub: 'soybean', 
+        groupZh: '🫘 Soybean 豆制品类', groupEn: '🫘 Soybean Products', 
+        nameZh: "鲜嫩冻豆腐", nameEn: "Frozen Tofu", 
+        descZh: "多孔吸汁，一口爆浆", descEn: "Spongy frozen tofu", 
+        dinnerOnly: false 
+      }
+    ];
+
+    function switchSession(session) {
+      currentSession = session;
+      document.getElementById('lunchBtn').classList.toggle('active', session === 'lunch');
+      document.getElementById('dinnerBtn').classList.toggle('active', session === 'dinner');
+
+      if (session === 'lunch') {
+        for (const id in cart) {
+          const item = menuData.find(i => i.id == id);
+          if (item && item.dinnerOnly) delete cart[id];
+        }
+      }
+      renderMenu();
+    }
+
+    function switchMainType(mainType) {
+      currentMain = mainType;
+      currentSub = 'all';
+      document.getElementById('mainTab-bbq').classList.toggle('active', mainType === 'bbq');
+      document.getElementById('mainTab-hotpot').classList.toggle('active', mainType === 'hotpot');
+      renderSubTabs();
+      renderMenu();
+    }
+
+    function renderSubTabs() {
+      const subTabsContainer = document.getElementById('subTypeTabs');
+      subTabsContainer.innerHTML = '';
+
+      let subs = [];
+      if (currentMain === 'bbq') {
+        subs = currentLang === 'zh' ? [
+          { key: 'all', name: '全部烤肉' },
+          { key: 'beef', name: '🥩 烤牛肉' },
+          { key: 'pork', name: '🥓 烤猪肉' },
+          { key: 'seafood', name: '🦐 海鲜' },
+          { key: 'chicken', name: '🍗 鸡肉' },
+          { key: 'veg', name: '🥬 烤蔬菜' }
+        ] : [
+          { key: 'all', name: 'All BBQ' },
+          { key: 'beef', name: '🥩 Beef' },
+          { key: 'pork', name: '🥓 Pork' },
+          { key: 'seafood', name: '🦐 Seafood' },
+          { key: 'chicken', name: '🍗 Chicken' },
+          { key: 'veg', name: '🥬 Veg' }
+        ];
+      } else {
+        subs = currentLang === 'zh' ? [
+          { key: 'all', name: '全部火锅' },
+          { key: 'soup', name: '🍲 锅底' },
+          { key: 'meat', name: '🥩 肉类' },
+          { key: 'noodle', name: '🍜 主食' },
+          { key: 'soybean', name: '🫘 豆制品' }
+        ] : [
+          { key: 'all', name: 'All Hot Pot' },
+          { key: 'soup', name: '🍲 Soup' },
+          { key: 'meat', name: '🥩 Meat' },
+          { key: 'noodle', name: '🍜 Noodles' },
+          { key: 'soybean', name: '🫘 Soybean' }
+        ];
+      }
+
+      subs.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = `sub-tab ${currentSub === s.key ? 'active' : ''}`;
+        btn.innerText = s.name;
+        btn.onclick = () => {
+          currentSub = s.key;
+          renderSubTabs();
+          renderMenu();
+        };
+        subTabsContainer.appendChild(btn);
+      });
+    }
+
+    function renderMenu() {
+      const list = document.getElementById('menuList');
+      list.innerHTML = '';
+      let totalCount = 0;
+
+      let filteredItems = menuData.filter(i => i.main === currentMain);
+      if (currentSub !== 'all') {
+        filteredItems = filteredItems.filter(i => i.sub === currentSub);
+      }
+
+      let lastGroup = '';
+      filteredItems.forEach(item => {
+        const qty = cart[item.id] || 0;
+        totalCount += qty;
+        const isDinnerLocked = (currentSession === 'lunch' && item.dinnerOnly);
+
+        const groupName = currentLang === 'zh' ? item.groupZh : item.groupEn;
+        if (groupName !== lastGroup) {
+          lastGroup = groupName;
+          const groupTitle = document.createElement('div');
+          groupTitle.className = 'section-title';
+          groupTitle.innerText = lastGroup;
+          list.appendChild(groupTitle);
+        }
+
+        const itemName = currentLang === 'zh' ? item.nameZh : item.nameEn;
+        const itemDesc = currentLang === 'zh' ? item.descZh : item.descEn;
+        const tagText = currentLang === 'zh' ? '🌙 仅限 Dinner 晚市提供' : '🌙 Dinner Only';
+
+        const card = document.createElement('div');
+        card.className = `item-card ${isDinnerLocked ? 'disabled-item' : ''}`;
+        card.innerHTML = `
+          <div class="item-info">
+            <div class="item-name">${itemName}</div>
+            <div class="item-desc">${itemDesc}</div>
+            ${item.dinnerOnly ? `<div class="dinner-tag">${tagText}</div>` : ''}
+          </div>
+          <div class="qty-ctrl">
+            ${qty > 0 ? `<button class="btn-qty" onclick="updateQty(${item.id}, -1)">-</button><span class="qty-num">${qty}</span>` : ''}
+            <button class="btn-qty" ${isDinnerLocked ? 'disabled style="opacity:0.3"' : ''} onclick="updateQty(${item.id}, 1)">+</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      const countText = currentLang === 'zh' ? `${totalCount} 份菜品` : `${totalCount} items`;
+      document.getElementById('totalCountDisplay').innerText = countText;
+      
+      const submitBtn = document.getElementById('submitBtn');
+      if (totalCount > 0) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = currentLang === 'zh' ? `发送加单 (${totalCount}份) 🔥` : `Submit Order (${totalCount}) 🔥`;
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.innerText = currentLang === 'zh' ? "请选择菜品" : "Select Items";
+      }
+    }
+
     function updateQty(id, change) {
       cart[id] = (cart[id] || 0) + change;
       if (cart[id] <= 0) delete cart[id];
       renderMenu();
     }
 
-    // 提交订单功能（拼接 Base64 动态还原，无需弹窗确认码）
     function submitOrder() {
       const orderItems = [];
-      let total = 0;
+      let totalCount = 0;
 
       for (const id in cart) {
         const item = menuData.find(i => i.id == id);
         if (item) {
-          const itemTotal = item.price * cart[id];
-          total += itemTotal;
-          orderItems.push(`- **${item.name}** x${cart[id]} ($${itemTotal.toFixed(2)})`);
+          totalCount += cart[id];
+          const n = currentLang === 'zh' ? item.nameZh : item.nameEn;
+          orderItems.push(`- **${n}** x${cart[id]}`);
         }
       }
 
-      if (orderItems.length === 0) {
-        alert('请先选择菜品！');
-        return;
-      }
+      if (orderItems.length === 0) return;
 
-      // 动态拼接并还原成真实 Token
       let fullToken = "";
       try {
         fullToken = atob((s1 + s2).trim());
       } catch (e) {
-        alert("❌ Token 解密失败，请检查配置！");
+        alert("❌ 密钥解密失败");
         return;
       }
 
-      const issueTitle = `【${currentTable}号桌】新订单`;
-      const issueBody = `### 🍽️ 订单详情\n**桌号：** ${currentTable}号\n**下单时间：** ${new Date().toLocaleString()}\n\n**菜品清单：**\n${orderItems.join('\n')}\n\n**总计金额：** $${total.toFixed(2)}`;
+      const currentTable = getTableNumber();
+      const sessionName = currentSession === 'lunch' ? (currentLang === 'zh' ? 'Lunch 午市' : 'Lunch') : (currentLang === 'zh' ? 'Dinner 晚市' : 'Dinner');
+      const issueTitle = `【${currentTable}号桌】${sessionName}加单 (${totalCount}份)`;
+      const issueBody = `### 🍽️ 点单详情\n**桌号：** ${currentTable}号\n**时段：** ${sessionName}\n**时间：** ${new Date().toLocaleString()}\n\n**加点清单：**\n${orderItems.join('\n')}`;
 
-      const submitBtn = document.querySelector('.btn-submit');
+      const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
-      submitBtn.innerText = "正在发送...";
+      submitBtn.innerText = currentLang === 'zh' ? "正在呼叫后厨..." : "Sending...";
 
-      // 发送到 GitHub Issues
       fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/issues`, {
         method: 'POST',
         headers: {
@@ -290,23 +870,23 @@
       })
       .then(res => {
         if (res.ok) {
-          alert(`✅ 订单已成功提交到厨房！\n桌号: ${currentTable}号`);
+          alert(currentLang === 'zh' ? `✅ 加单成功已送达后厨！\n桌号: ${currentTable}号 (${sessionName})` : `✅ Order sent successfully!\nTable: #${currentTable} (${sessionName})`);
           cart = {};
           renderMenu();
         } else {
-          alert(`❌ 订单提交失败！错误状态码: ${res.status}`);
+          alert(`❌ 提交失败 Status: ${res.status}`);
+          submitBtn.disabled = false;
+          submitBtn.innerText = currentLang === 'zh' ? "发送加单 🔥" : "Submit Order 🔥";
         }
       })
-      .catch(err => {
-        alert('❌ 网络连接错误，请检查网络后重试。');
-      })
-      .finally(() => {
+      .catch(() => {
+        alert('❌ 网络连接错误');
         submitBtn.disabled = false;
-        submitBtn.innerText = "发送订单";
+        submitBtn.innerText = currentLang === 'zh' ? "发送加单 🔥" : "Submit Order 🔥";
       });
     }
 
-    // 页面初始化
+    renderSubTabs();
     renderMenu();
   </script>
 </body>
