@@ -1,898 +1,290 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOP POT K BBQ & HOT POT - 自助点餐系统</title>
-    <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --accent-red: #e50914;
-            --accent-gold: #d4af37;
-            --text-light: #f5f5f5;
-            --text-muted: #aaa;
-            --border-color: #333;
-            --disabled-bg: #181818;
-            --disabled-text: #555;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在线点餐系统</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f5f5f7; color: #333; padding-bottom: 80px; }
+    header { background: #fff; padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; }
+    h1 { font-size: 1.2rem; color: #1d1d1f; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+    
+    /* 顶栏桌号与餐期选择器 */
+    .controls-bar { background: #fff; padding: 12px 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .table-info { font-weight: 600; font-size: 0.95rem; color: #1d1d1f; display: flex; align-items: center; gap: 6px; }
+    .table-badge { background: #e8f0fe; color: #1a73e8; padding: 4px 8px; border-radius: 6px; font-size: 0.9rem; }
+    
+    .meal-toggle { display: flex; background: #f0f0f2; border-radius: 8px; padding: 2px; }
+    .meal-btn { border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; background: transparent; color: #666; transition: all 0.2s; }
+    .meal-btn.active { background: #fff; color: #1d1d1f; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+    /* 菜品列表 */
+    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+    .category-title { font-size: 1.1rem; margin: 15px 0 10px; color: #86868b; }
+    .menu-item { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); transition: opacity 0.3s; }
+    .menu-item.disabled { opacity: 0.4; pointer-events: none; background: #fafafa; }
+    .item-info h3 { font-size: 1rem; margin-bottom: 4px; }
+    .item-info .tag { display: inline-block; font-size: 0.75rem; color: #ff3b30; background: #ffe5e5; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+    .item-price { font-size: 0.95rem; font-weight: 600; color: #1d1d1f; }
+    
+    .quantity-control { display: flex; align-items: center; gap: 8px; }
+    .btn-qty { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; background: #fff; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-qty.plus { background: #0071e3; color: #fff; border: none; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            padding-bottom: 90px;
-        }
+    /* 底部结算栏 */
+    .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto; }
+    .cart-summary { display: flex; flex-direction: column; }
+    .cart-total { font-size: 1.1rem; font-weight: bold; color: #ff3b30; }
+    .btn-submit { background: #34c759; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-size: 1rem; font-weight: 600; cursor: pointer; }
 
-        /* Header */
-        header {
-            background: linear-gradient(180deg, #2a0808 0%, #121212 100%);
-            padding: 18px 15px 12px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .brand-title {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--accent-red);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .brand-subtitle {
-            font-size: 13px;
-            color: var(--accent-gold);
-            margin-top: 2px;
-            font-weight: 600;
-        }
-
-        .store-info {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Control Panel (Table #, Meal Period) */
-        .control-panel {
-            background-color: var(--card-bg);
-            margin: 12px;
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: bold;
-            color: var(--accent-gold);
-            margin-bottom: 6px;
-        }
-
-        input[type="text"], select {
-            width: 100%;
-            padding: 10px 12px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-        }
-
-        input[type="text"]:focus, select:focus {
-            border-color: var(--accent-red);
-        }
-
-        /* Meal Selection Segment */
-        .meal-toggle {
-            display: table;
-            width: 100%;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid #444;
-            background-color: #2a2a2a;
-        }
-
-        .meal-option {
-            display: table-cell;
-            width: 50%;
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-muted);
-        }
-
-        .meal-option.active {
-            background-color: var(--accent-red);
-            color: #fff;
-        }
-
-        /* Category Nav Horizontally Scrollable */
-        .nav-categories {
-            display: flex;
-            overflow-x: auto;
-            background-color: #1a1a1a;
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 95px;
-            z-index: 90;
-            scrollbar-width: none;
-        }
-
-        .nav-categories::-webkit-scrollbar {
-            display: none;
-        }
-
-        .cat-btn {
-            white-space: nowrap;
-            padding: 6px 14px;
-            margin-right: 8px;
-            border-radius: 20px;
-            background-color: #2a2a2a;
-            color: #ccc;
-            font-size: 13px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .cat-btn.active {
-            background-color: var(--accent-gold);
-            color: #000;
-            font-weight: bold;
-        }
-
-        /* Menu Items List */
-        .menu-container {
-            padding: 12px;
-        }
-
-        .category-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent-gold);
-            margin: 16px 0 10px;
-            padding-bottom: 4px;
-            border-bottom: 2px solid var(--accent-gold);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 12px;
-        }
-
-        .item-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        /* DISABLED STYLES FOR LUNCH TIME DINNER ITEMS */
-        .item-card.dinner-disabled {
-            background-color: var(--disabled-bg) !important;
-            border-color: #222 !important;
-            opacity: 0.45;
-            filter: grayscale(100%);
-            pointer-events: none; /* Completely disable clicks/interactions */
-            user-select: none;
-        }
-
-        .item-card.dinner-disabled::after {
-            content: "仅限晚市 Dinner Only";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg);
-            background-color: rgba(229, 9, 20, 0.85);
-            color: #fff;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-        }
-
-        .item-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .item-code {
-            background-color: var(--accent-red);
-            color: #fff;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .item-tags {
-            display: flex;
-            gap: 4px;
-        }
-
-        .tag-dinner {
-            background-color: #8b0000;
-            color: #ffcccc;
-            font-size: 9px;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-weight: bold;
-        }
-
-        .tag-gf {
-            background-color: #2e7d32;
-            color: #e8f5e9;
-            font-size: 9px;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-weight: bold;
-        }
-
-        .item-name {
-            font-size: 14px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .item-price {
-            font-size: 13px;
-            color: var(--accent-gold);
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .item-controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 8px;
-        }
-
-        .btn-qty {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: none;
-            background-color: var(--accent-red);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-qty:disabled {
-            background-color: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-
-        .qty-num {
-            font-size: 14px;
-            font-weight: bold;
-            color: #fff;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        /* Bottom Floating Bar */
-        .cart-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: #1f1f1f;
-            border-top: 1px solid #333;
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 200;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
-        }
-
-        .cart-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .cart-count {
-            font-size: 14px;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .cart-detail {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .btn-submit {
-            background-color: var(--accent-red);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(229, 9, 20, 0.4);
-        }
-
-        .btn-submit:disabled {
-            background-color: #555;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        /* Modal Popup for Order Confirmation */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--accent-gold);
-            width: 100%;
-            max-width: 400px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 14px;
-            background-color: #2a2a2a;
-            border-bottom: 1px solid #333;
-            text-align: center;
-            font-weight: bold;
-            color: var(--accent-gold);
-        }
-
-        .modal-body {
-            padding: 14px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .order-summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2a2a;
-            font-size: 14px;
-        }
-
-        .modal-footer {
-            padding: 14px;
-            border-top: 1px solid #333;
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-modal {
-            flex: 1;
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-cancel {
-            background-color: #444;
-            color: #fff;
-        }
-
-        .btn-confirm {
-            background-color: var(--accent-red);
-            color: #fff;
-        }
-
-        /* Config Modal for Github Token */
-        .config-btn {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 18px;
-            cursor: pointer;
-        }
-    </style>
+    /* 设置弹窗 */
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 85%; max-width: 400px; }
+    .modal-content h2 { font-size: 1.1rem; margin-bottom: 12px; }
+    .modal-content input { width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .btn-secondary { background: #eee; border: none; padding: 8px 14px; border-radius: 6px; }
+    .btn-primary { background: #0071e3; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; }
+  </style>
 </head>
 <body>
 
-    <header>
-        <button class="config-btn" onclick="openConfigModal()" title="设置GitHub Token">⚙️</button>
-        <div class="brand-title">TOP POT</div>
-        <div class="brand-subtitle">K BBQ & HOT POT</div>
-        <div class="store-info">2655 Richmond Ave, Staten Island, NY 10314 | 347-349-2364</div>
-    </header>
-
-    <!-- Table & Meal Selection -->
-    <div class="control-panel">
-        <div class="form-group">
-            <label for="tableNumber">桌号 / Table Number <span style="color:red">*</span></label>
-            <input type="text" id="tableNumber" placeholder="请输入您的桌号 (例: T08)" required>
-        </div>
-        <div class="form-group">
-            <label>用餐时段 / Meal Period</label>
-            <div class="meal-toggle">
-                <div class="meal-option active" id="btnLunch" onclick="setMealPeriod('lunch')">
-                    ☀️ 午市 Lunch
-                </div>
-                <div class="meal-option" id="btnDinner" onclick="setMealPeriod('dinner')">
-                    🌙 晚市 Dinner
-                </div>
-            </div>
-        </div>
+  <header>
+    <h1>自助点餐系统</h1>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="openSettings()" title="设置">⚙️</button>
     </div>
+  </header>
 
-    <!-- Category Nav Bar -->
-    <div class="nav-categories" id="navCategories">
-        <!-- Dynamic Category Buttons -->
+  <div class="controls-bar">
+    <div class="table-info">
+      桌号：<span class="table-badge" id="tableDisplay">未指定</span>
     </div>
-
-    <!-- Menu Section -->
-    <div class="menu-container" id="menuContainer">
-        <!-- Dynamic Menu Items -->
+    <div class="meal-toggle">
+      <button class="meal-btn active" id="btnLunch" onclick="switchMeal('lunch')">午市</button>
+      <button class="meal-btn" id="btnDinner" onclick="switchMeal('dinner')">晚市</button>
     </div>
+  </div>
 
-    <!-- Bottom Cart Floating Bar -->
-    <div class="cart-bar">
-        <div class="cart-info">
-            <div class="cart-count" id="cartCount">已选: 0 项</div>
-            <div class="cart-detail" id="cartDetail">按桌号快速点单至后厨/服务员</div>
-        </div>
-        <button class="btn-submit" id="btnSubmitOrder" onclick="openConfirmModal()" disabled>核对并提交</button>
+  <div class="container" id="menuContainer">
+    <!-- 菜单会自动在这里渲染 -->
+  </div>
+
+  <div class="cart-bar">
+    <div class="cart-summary">
+      <span>已选 <b id="cartCount">0</b> 项</span>
+      <span class="cart-total" id="cartTotal">$0.00</span>
     </div>
+    <button class="btn-submit" onclick="submitOrder()">提交订单</button>
+  </div>
 
-    <!-- Confirm Modal -->
-    <div class="modal" id="confirmModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                确认订单明细
-            </div>
-            <div class="modal-body" id="modalOrderSummary">
-                <!-- Order items summary -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn-modal btn-cancel" onclick="closeConfirmModal()">修改</button>
-                <button class="btn-modal btn-confirm" id="btnFinalSend" onclick="sendOrderToGitHub()">确认发送至手机</button>
-            </div>
-        </div>
+  <!-- 设置弹窗 -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <h2>后台设置</h2>
+      <label style="font-size:0.85rem; color:#666;">GitHub Personal Access Token (用于接收订单):</label>
+      <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxx">
+      <label style="font-size:0.85rem; color:#666;">管理手动修改桌号:</label>
+      <input type="text" id="manualTableInput" placeholder="输入新桌号">
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeSettings()">取消</button>
+        <button class="btn-primary" onclick="saveSettings()">保存</button>
+      </div>
     </div>
+  </div>
 
-    <!-- GitHub Config Modal (Optional for store owner setup) -->
-    <div class="modal" id="configModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                GitHub API 设置 (后台设置)
+  <script>
+    // 示例菜品数据
+    const menuData = [
+      { id: 101, category: "热菜/主食", name: "宫保鸡丁", price: 14.99, dinnerOnly: false },
+      { id: 102, category: "热菜/主食", name: "清蒸石斑鱼", price: 28.99, dinnerOnly: true },
+      { id: 103, category: "热菜/主食", name: "麻婆豆腐", price: 11.99, dinnerOnly: false },
+      { id: 201, category: "酒水饮品", name: "冻柠茶", price: 3.50, dinnerOnly: false },
+      { id: 202, category: "酒水饮品", name: "特调鸡尾酒", price: 9.99, dinnerOnly: true }
+    ];
+
+    let currentMeal = 'lunch'; // 默认午市
+    let currentTable = '1';    // 默认1号桌
+    let cart = {};
+
+    // 页面初始化
+    window.onload = function() {
+      // 1. 从 URL 获取桌号参数 (如 ?table=3)
+      const urlParams = new URLSearchParams(window.location.search);
+      const tableFromUrl = urlParams.get('table');
+      
+      if (tableFromUrl) {
+        currentTable = tableFromUrl;
+      } else if (localStorage.getItem('savedTable')) {
+        currentTable = localStorage.getItem('savedTable');
+      }
+
+      document.getElementById('tableDisplay').innerText = currentTable + " 号桌";
+      
+      // 2. 加载保存的 Token
+      if (localStorage.getItem('ghToken')) {
+        document.getElementById('tokenInput').value = localStorage.getItem('ghToken');
+      }
+
+      // 3. 渲染菜单
+      renderMenu();
+    };
+
+    // 切换午晚市
+    function switchMeal(type) {
+      currentMeal = type;
+      document.getElementById('btnLunch').classList.toggle('active', type === 'lunch');
+      document.getElementById('btnDinner').classList.toggle('active', type === 'dinner');
+      renderMenu();
+    }
+
+    // 渲染菜单界面
+    function renderMenu() {
+      const container = document.getElementById('menuContainer');
+      container.innerHTML = '';
+
+      // 按分类分组
+      const categories = [...new Set(menuData.map(item => item.category))];
+
+      categories.forEach(cat => {
+        const catTitle = document.createElement('div');
+        catTitle.className = 'category-title';
+        catTitle.innerText = cat;
+        container.appendChild(catTitle);
+
+        const items = menuData.filter(i => i.category === cat);
+        items.forEach(item => {
+          const isDisabled = (currentMeal === 'lunch' && item.dinnerOnly);
+          const qty = cart[item.id] || 0;
+
+          const itemEl = document.createElement('div');
+          itemEl.className = `menu-item ${isDisabled ? 'disabled' : ''}`;
+          itemEl.innerHTML = `
+            <div class="item-info">
+              <h3>${item.name}${item.dinnerOnly ? '<span class="tag">仅晚市</span>' : ''}</h3>
+              <div class="item-price">$${item.price.toFixed(2)}</div>
             </div>
-            <div class="modal-body">
-                <p style="font-size:12px; color:#aaa; margin-bottom:10px;">设置后订单将直接作为 Issue 发送到您的 GitHub 仓库，您的手机 GitHub App 会收到即时通知。</p>
-                <div class="form-group">
-                    <label>GitHub Personal Access Token (PAT):</label>
-                    <input type="text" id="cfgToken" placeholder="ghp_xxxxxxxxxxxx">
-                </div>
-                <div class="form-group">
-                    <label>GitHub Username (拥有者):</label>
-                    <input type="text" id="cfgOwner" placeholder="例如: qingbinchen">
-                </div>
-                <div class="form-group">
-                    <label>Repository Name (仓库名):</label>
-                    <input type="text" id="cfgRepo" placeholder="例如: bbq-orders">
-                </div>
+            <div class="quantity-control">
+              ${qty > 0 ? `<button class="btn-qty" onclick="updateQty(${item.id}, -1)">-</button><span>${qty}</span>` : ''}
+              <button class="btn-qty plus" onclick="updateQty(${item.id}, 1)" ${isDisabled ? 'disabled' : ''}>+</button>
             </div>
-            <div class="modal-footer">
-                <button class="btn-modal btn-cancel" onclick="closeConfigModal()">取消</button>
-                <button class="btn-modal btn-confirm" onclick="saveConfig()">保存设置</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Menu Data Transcribed from Menu Card
-        const menuData = [
-            {
-                category: "BBQ Beef",
-                items: [
-                    { code: "B1", name: "Beef Bulgogi", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "B2", name: "Spicy Beef Bulgogi", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "B3", name: "Ribeye Steak", price: "AYCE", isDinnerOnly: true, isGF: true },
-                    { code: "B4", name: "Beef Tongue", price: "AYCE", isDinnerOnly: true, isGF: true },
-                    { code: "B5", name: "Angus Steak", price: "AYCE", isDinnerOnly: true, isGF: true },
-                    { code: "B6", name: "Prime Brisket", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "B7", name: "Short Ribs", price: "AYCE", isDinnerOnly: true, isGF: false },
-                    { code: "B8", name: "Chuck Tail Flap", price: "AYCE", isDinnerOnly: true, isGF: true }
-                ]
-            },
-            {
-                category: "BBQ Pork",
-                items: [
-                    { code: "P1", name: "Premium Pork Belly", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "P2", name: "Miso Pork Belly", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "P3", name: "Pork Cheek", price: "AYCE", isDinnerOnly: true, isGF: true },
-                    { code: "P4", name: "Spicy Pork Belly", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "P5", name: "Garlic Pork Belly", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "P6", name: "Mini Sausage", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "P7", name: "Italian Sausage", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "P8", name: "Black Pepper Pork Belly", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "P9", name: "Tangy Pork Belly", price: "AYCE", isDinnerOnly: false, isGF: false }
-                ]
-            },
-            {
-                category: "BBQ Seafood",
-                items: [
-                    { code: "S1", name: "Spicy Calamari", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "S2", name: "Mussel", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "S3", name: "Spicy Octopus", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "S4", name: "Garlic Shrimp", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "S5", name: "Jumbo Shrimp", price: "AYCE", isDinnerOnly: true, isGF: true },
-                    { code: "S6", name: "Spicy Salmon", price: "AYCE", isDinnerOnly: true, isGF: false },
-                    { code: "S7", name: "Garlic Calamari", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "S8", name: "Fresh Salmon", price: "AYCE", isDinnerOnly: true, isGF: true }
-                ]
-            },
-            {
-                category: "BBQ Chicken",
-                items: [
-                    { code: "C1", name: "Chicken Bulgogi", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "C2", name: "Garlic Chicken", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "C3", name: "Spicy Chicken Bulgogi", price: "AYCE", isDinnerOnly: false, isGF: false },
-                    { code: "C4", name: "Black Pepper Chicken", price: "AYCE", isDinnerOnly: false, isGF: false }
-                ]
-            },
-            {
-                category: "BBQ Vegetable",
-                items: [
-                    { code: "V1", name: "Pumpkin", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V2", name: "Onion", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V3", name: "Enoki Mushroom", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V4", name: "Potato", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V5", name: "King Mushroom", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V6", name: "Hot Pepper", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V7", name: "Fresh Corn", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V8", name: "Pineapple", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V9", name: "White Mushroom", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V10", name: "Green Leaf Lettuce", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V11", name: "Garlic", price: "AYCE", isDinnerOnly: false, isGF: true },
-                    { code: "V12", name: "Sweet Potato", price: "AYCE", isDinnerOnly: false, isGF: true }
-                ]
-            },
-            {
-                category: "Drinks",
-                items: [
-                    { code: "D1", name: "Pepsi", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D2", name: "Diet Pepsi", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D3", name: "Starry", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D4", name: "Ginger Ale", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D5", name: "Crush Orange", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D6", name: "Lemonade Pink", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D7", name: "Fruit Punch", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D8", name: "Sweet Tea", price: "$3.25", isDinnerOnly: false, isGF: true },
-                    { code: "D9", name: "Apple Juice", price: "$4.50", isDinnerOnly: false, isGF: true },
-                    { code: "D10", name: "Orange Juice", price: "$4.50", isDinnerOnly: false, isGF: true },
-                    { code: "D11", name: "Cranberry Juice", price: "$4.50", isDinnerOnly: false, isGF: true },
-                    { code: "D12", name: "Herbal Tea", price: "$3.00", isDinnerOnly: false, isGF: true },
-                    { code: "D13", name: "Coconut Milk", price: "$3.00", isDinnerOnly: false, isGF: true }
-                ]
-            }
-        ];
-
-        // State variables
-        let currentMealPeriod = 'lunch'; // default lunch
-        let cart = {}; // { itemCode: quantity }
-
-        // GitHub API Defaults (Loaded from localStorage if available)
-        let ghConfig = {
-            token: localStorage.getItem('gh_token') || '',
-            owner: localStorage.getItem('gh_owner') || '',
-            repo: localStorage.getItem('gh_repo') || ''
-        };
-
-        // Initialize App
-        window.addEventListener('DOMContentLoaded', () => {
-            renderCategoriesNav();
-            renderMenu();
-            updateCartDisplay();
+          `;
+          container.appendChild(itemEl);
         });
+      });
 
-        function setMealPeriod(period) {
-            currentMealPeriod = period;
-            document.getElementById('btnLunch').classList.toggle('active', period === 'lunch');
-            document.getElementById('btnDinner').classList.toggle('active', period === 'dinner');
-            
-            // If switched to Lunch, remove any dinner-only items from cart automatically
-            if (period === 'lunch') {
-                menuData.forEach(cat => {
-                    cat.items.forEach(item => {
-                        if (item.isDinnerOnly && cart[item.code]) {
-                            delete cart[item.code];
-                        }
-                    });
-                });
-            }
+      updateCartSummary();
+    }
 
-            renderMenu();
-            updateCartDisplay();
+    // 更新数量
+    function updateQty(id, change) {
+      const current = cart[id] || 0;
+      const newQty = current + change;
+      if (newQty <= 0) {
+        delete cart[id];
+      } else {
+        cart[id] = newQty;
+      }
+      renderMenu();
+    }
+
+    // 更新购物车底部统计
+    function updateCartSummary() {
+      let count = 0;
+      let total = 0;
+      for (const id in cart) {
+        const item = menuData.find(i => i.id == id);
+        if (item) {
+          count += cart[id];
+          total += item.price * cart[id];
         }
+      }
+      document.getElementById('cartCount').innerText = count;
+      document.getElementById('cartTotal').innerText = `$${total.toFixed(2)}`;
+    }
 
-        function renderCategoriesNav() {
-            const nav = document.getElementById('navCategories');
-            nav.innerHTML = menuData.map((cat, idx) => `
-                <button class="cat-btn ${idx === 0 ? 'active' : ''}" onclick="scrollToCategory('cat-${idx}', this)">
-                    ${cat.category}
-                </button>
-            `).join('');
+    // 弹窗设置
+    function openSettings() {
+      document.getElementById('settingsModal').style.display = 'flex';
+      document.getElementById('manualTableInput').value = currentTable;
+    }
+    function closeSettings() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+    function saveSettings() {
+      const token = document.getElementById('tokenInput').value;
+      const newTable = document.getElementById('manualTableInput').value;
+      
+      if (token) localStorage.setItem('ghToken', token);
+      if (newTable) {
+        currentTable = newTable;
+        localStorage.setItem('savedTable', newTable);
+        document.getElementById('tableDisplay').innerText = currentTable + " 号桌";
+      }
+      closeSettings();
+      alert('设置已保存');
+    }
+
+    // 提交订单到 GitHub Issue
+    function submitOrder() {
+      const token = localStorage.getItem('ghToken');
+      if (!token) {
+        alert('请先点击右上角 ⚙️ 按钮配置 GitHub Token！');
+        openSettings();
+        return;
+      }
+
+      const orderItems = [];
+      let total = 0;
+      for (const id in cart) {
+        const item = menuData.find(i => i.id == id);
+        if (item) {
+          const itemTotal = item.price * cart[id];
+          total += itemTotal;
+          orderItems.push(`- ${item.name} x${cart[id]} ($${itemTotal.toFixed(2)})`);
         }
+      }
 
-        function scrollToCategory(id, btnElement) {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btnElement.classList.add('active');
-            const el = document.getElementById(id);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+      if (orderItems.length === 0) {
+        alert('请先选择菜品！');
+        return;
+      }
+
+      const issueTitle = `【新订单】桌号：${currentTable} | 餐期：${currentMeal === 'lunch' ? '午市' : '晚市'} | 总价：$${total.toFixed(2)}`;
+      const issueBody = `### 订单详情\n- **桌号**: ${currentTable}\n- **用餐时段**: ${currentMeal === 'lunch' ? '午市' : '晚市'}\n- **下单时间**: ${new Date().toLocaleString()}\n\n### 菜品列表\n${orderItems.join('\n')}\n\n**合计总额**: $${total.toFixed(2)}`;
+
+      // 发送到 GitHub Repo Issues (需要修改为你自己的 repo path)
+      const repoOwner = "HenryC0619";
+      const repoName = "tp-menu";
+
+      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/issues`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: issueTitle,
+          body: issueBody
+        })
+      })
+      .then(res => {
+        if (res.ok) {
+          alert(`✅ 订单已成功发送至厨房！\n桌号: ${currentTable}`);
+          cart = {};
+          renderMenu();
+        } else {
+          alert('❌ 提交失败，请检查 Token 权限或网络。');
         }
-
-        function renderMenu() {
-            const container = document.getElementById('menuContainer');
-            container.innerHTML = menuData.map((cat, idx) => `
-                <div id="cat-${idx}">
-                    <div class="category-title">${cat.category}</div>
-                    <div class="grid-container">
-                        ${cat.items.map(item => {
-                            const isDinnerDisabled = (currentMealPeriod === 'lunch' && item.isDinnerOnly);
-                            const qty = cart[item.code] || 0;
-
-                            return `
-                                <div class="item-card ${isDinnerDisabled ? 'dinner-disabled' : ''}">
-                                    <div>
-                                        <div class="item-header">
-                                            <span class="item-code">${item.code}</span>
-                                            <div class="item-tags">
-                                                ${item.isDinnerOnly ? '<span class="tag-dinner">Dinner Only</span>' : ''}
-                                                ${item.isGF ? '<span class="tag-gf">GF</span>' : ''}
-                                            </div>
-                                        </div>
-                                        <div class="item-name">${item.name}</div>
-                                        <div class="item-price">${item.price}</div>
-                                    </div>
-
-                                    <div class="item-controls">
-                                        <button class="btn-qty" onclick="changeQty('${item.code}', -1)" ${isDinnerDisabled || qty === 0 ? 'disabled' : ''}>-</button>
-                                        <span class="qty-num">${qty}</span>
-                                        <button class="btn-qty" onclick="changeQty('${item.code}', 1)" ${isDinnerDisabled ? 'disabled' : ''}>+</button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function changeQty(code, delta) {
-            const current = cart[code] || 0;
-            const newQty = current + delta;
-            
-            if (newQty <= 0) {
-                delete cart[code];
-            } else {
-                cart[code] = newQty;
-            }
-
-            renderMenu();
-            updateCartDisplay();
-        }
-
-        function updateCartDisplay() {
-            let totalItems = 0;
-            for (let code in cart) {
-                totalItems += cart[code];
-            }
-
-            document.getElementById('cartCount').innerText = `已选: ${totalItems} 份菜品`;
-            document.getElementById('btnSubmitOrder').disabled = (totalItems === 0);
-        }
-
-        function getItemByCode(code) {
-            for (let cat of menuData) {
-                for (let item of cat.items) {
-                    if (item.code === code) return item;
-                }
-            }
-            return null;
-        }
-
-        function openConfirmModal() {
-            const tableNum = document.getElementById('tableNumber').value.trim();
-            if (!tableNum) {
-                alert("请先填写您的桌号！(Please enter Table Number)");
-                document.getElementById('tableNumber').focus();
-                return;
-            }
-
-            const summaryEl = document.getElementById('modalOrderSummary');
-            let html = `<p style="margin-bottom:10px; font-weight:bold; color:var(--accent-gold);">桌号: ${tableNum} (${currentMealPeriod === 'lunch' ? '午市 Lunch' : '晚市 Dinner'})</p>`;
-            
-            for (let code in cart) {
-                const item = getItemByCode(code);
-                html += `
-                    <div class="order-summary-item">
-                        <span>[${item.code}] ${item.name}</span>
-                        <span style="font-weight:bold; color:var(--accent-gold);">x ${cart[code]}</span>
-                    </div>
-                `;
-            }
-
-            summaryEl.innerHTML = html;
-            document.getElementById('confirmModal').classList.add('active');
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').classList.remove('active');
-        }
-
-        async function sendOrderToGitHub() {
-            const tableNum = document.getElementById('tableNumber').value.trim();
-            const btnSend = document.getElementById('btnFinalSend');
-            
-            btnSend.innerText = "发送中...";
-            btnSend.disabled = true;
-
-            // Check GitHub token config
-            if (!ghConfig.token || !ghConfig.owner || !ghConfig.repo) {
-                alert("未配置 GitHub Token，将为您显示模拟成功！(请按右上角⚙️图标配置接收提醒的 GitHub 仓库信息)");
-                finishOrderSuccess();
-                return;
-            }
-
-            // Construct Markdown Body
-            let orderLines = [];
-            for (let code in cart) {
-                const item = getItemByCode(code);
-                orderLines.push(`- **[${item.code}] ${item.name}**  x **${cart[code]}**`);
-            }
-
-            const issueTitle = `【新订单】桌号: ${tableNum} (${currentMealPeriod.toUpperCase()})`;
-            const issueBody = `### 🍽️ 新自助点餐单
-- **桌号 / Table**: ${tableNum}
-- **时段 / Period**: ${currentMealPeriod === 'lunch' ? 'Lunch 午市' : 'Dinner 晚市'}
-- **下单时间**: ${new Date().toLocaleString()}
-
-### 📋 菜品明细:
-${orderLines.join('
-')}
-
----
-*请服务员速将此单录入 Chowbus 系统！*`;
-
-            try {
-                const response = await fetch(`https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/issues`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `token ${ghConfig.token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify({
-                        title: issueTitle,
-                        body: issueBody,
-                        labels: ['new-order', currentMealPeriod]
-                    })
-                });
-
-                if (response.ok) {
-                    finishOrderSuccess();
-                } else {
-                    const err = await response.json();
-                    alert("发送失败: " + (err.message || "请检查GitHub Token和仓库名设置"));
-                    btnSend.innerText = "确认发送至手机";
-                    btnSend.disabled = false;
-                }
-            } catch (e) {
-                alert("网络错误: " + e.message);
-                btnSend.innerText = "确认发送至手机";
-                btnSend.disabled = false;
-            }
-        }
-
-        function finishOrderSuccess() {
-            alert("✅ 点餐成功！您的订单已直接发送至服务员手机！");
-            cart = {};
-            updateCartDisplay();
-            renderMenu();
-            closeConfirmModal();
-            document.getElementById('btnFinalSend').innerText = "确认发送至手机";
-            document.getElementById('btnFinalSend').disabled = false;
-        }
-
-        // Config Modal Functions
-        function openConfigModal() {
-            document.getElementById('cfgToken').value = ghConfig.token;
-            document.getElementById('cfgOwner').value = ghConfig.owner;
-            document.getElementById('cfgRepo').value = ghConfig.repo;
-            document.getElementById('configModal').classList.add('active');
-        }
-
-        function closeConfigModal() {
-            document.getElementById('configModal').classList.remove('active');
-        }
-
-        function saveConfig() {
-            ghConfig.token = document.getElementById('cfgToken').value.trim();
-            ghConfig.owner = document.getElementById('cfgOwner').value.trim();
-            ghConfig.repo = document.getElementById('cfgRepo').value.trim();
-
-            localStorage.setItem('gh_token', ghConfig.token);
-            localStorage.setItem('gh_owner', ghConfig.owner);
-            localStorage.setItem('gh_repo', ghConfig.repo);
-
-            alert("GitHub API 设置保存成功！");
-            closeConfigModal();
-        }
-    </script>
+      })
+      .catch(err => {
+        console.error(err);
+        alert('❌ 发送出错，请重试。');
+      });
+    }
+  </script>
 </body>
 </html>
