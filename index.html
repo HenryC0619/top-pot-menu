@@ -136,7 +136,7 @@
       border: 1px solid var(--card-border);
       padding: 10px;
       border-radius: 10px;
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       font-weight: bold;
       text-align: center;
       cursor: pointer;
@@ -227,6 +227,13 @@
       font-size: 0.72rem;
       color: var(--text-muted);
       line-height: 1.25;
+    }
+
+    .item-price {
+      font-size: 0.85rem;
+      color: var(--gold);
+      font-weight: bold;
+      margin-top: 2px;
     }
 
     /* 猪肉/清真 提示标签 */
@@ -359,6 +366,100 @@
       box-shadow: none;
       cursor: not-allowed;
     }
+
+    /* 管理员弹窗样式 */
+    .admin-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .admin-modal {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    }
+    .admin-modal h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      text-align: center;
+      color: var(--text-main);
+    }
+    .admin-section {
+      margin-bottom: 16px;
+    }
+    .admin-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .admin-input {
+      width: 100%;
+      background: #1f1f1f;
+      border: 1px solid #404040;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .btn-group-toggle {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-toggle {
+      flex: 1;
+      background: #1f1f1f;
+      border: 1px solid #404040;
+      color: var(--text-muted);
+      padding: 8px 4px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-toggle.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn-admin-save {
+      flex: 1;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-admin-cancel {
+      flex: 1;
+      background: #262626;
+      color: #fff;
+      border: 1px solid #404040;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -378,6 +479,7 @@
   <div class="main-type-tabs">
     <div class="main-tab active" id="mainTab-bbq" onclick="switchMainType('bbq')">🔥 K-BBQ 烤肉区</div>
     <div class="main-tab" id="mainTab-hotpot" onclick="switchMainType('hotpot')">🍲 HOT POT 火锅区</div>
+    <div class="main-tab" id="mainTab-drink" onclick="switchMainType('drink')">🥤 DRINKS 饮料区</div>
   </div>
 
   <div class="sub-type-tabs" id="subTypeTabs"></div>
@@ -392,6 +494,41 @@
       <div class="total-amount" id="totalCountDisplay">0 样菜品</div>
     </div>
     <button class="btn-submit" id="submitBtn" onclick="submitOrder()" disabled>请选择菜品</button>
+  </div>
+
+  <!-- 管理员设置弹窗 -->
+  <div id="adminModal" class="admin-modal-overlay" style="display: none;">
+    <div class="admin-modal">
+      <h2 id="adminModalTitle">⚙️ 管理员设置</h2>
+      
+      <div class="admin-section">
+        <label class="admin-label" id="adminTableLabel">桌号设置：</label>
+        <input type="text" id="adminTableInput" class="admin-input" />
+      </div>
+
+      <div class="admin-section">
+        <label class="admin-label" id="adminSessionLabel">Session 锁定：</label>
+        <div class="btn-group-toggle">
+          <button class="btn-toggle" id="sLock-none" onclick="setSessionLockTemp('none')">不锁定</button>
+          <button class="btn-toggle" id="sLock-lunch" onclick="setSessionLockTemp('lunch')">仅 Lunch</button>
+          <button class="btn-toggle" id="sLock-dinner" onclick="setSessionLockTemp('dinner')">仅 Dinner</button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <label class="admin-label" id="adminTypeLabel">品类锁定：</label>
+        <div class="btn-group-toggle">
+          <button class="btn-toggle" id="tLock-none" onclick="setTypeLockTemp('none')">不锁定</button>
+          <button class="btn-toggle" id="tLock-hotpot" onclick="setTypeLockTemp('hotpot')">仅 Hot Pot</button>
+          <button class="btn-toggle" id="tLock-bbq" onclick="setTypeLockTemp('bbq')">仅 BBQ</button>
+        </div>
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn-admin-cancel" onclick="closeAdminModal()">取消</button>
+        <button class="btn-admin-save" onclick="saveAdminModal()">保存并应用</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -422,11 +559,10 @@
       { id: 11, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P3. Pork Cheek", nameEn: "P3. Pork Cheek", descZh: "猪颈肉/猪脸颊肉，爽脆弹牙", descEn: "Tender and crispy pork cheek", dinnerOnly: true },
       { id: 12, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P4. Spicy Pork Belly", nameEn: "P4. Spicy Pork Belly", descZh: "香辣五花肉", descEn: "Spicy flavored pork belly", dinnerOnly: false },
       { id: 13, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P5. Garlic Pork Belly", nameEn: "P5. Garlic Pork Belly", descZh: "蒜香五花肉", descEn: "Garlic flavored pork belly", dinnerOnly: false },
-      { id: 14, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P6. Mini Sausage", nameEn: "P6. Mini Sausage", descZh: "迷你烤肠", descEn: "Mini grilled sausage", dinnerOnly: false },
+      { id: 14, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P6. Mini Sausage", nameEn: "P6. Mini Sausage", descZh: "迷你烤肠", descEn: "Mini grill sausage", dinnerOnly: false },
       { id: 15, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P7. Italian Sausage", nameEn: "P7. Italian Sausage", descZh: "意式香肠", descEn: "Italian style sausage", dinnerOnly: false },
       { id: 16, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P8. Black Pepper Pork Belly", nameEn: "P8. Black Pepper Pork Belly", descZh: "黑椒风味五花肉", descEn: "Black pepper pork belly", dinnerOnly: false },
-      { id: 17, main: 'bbq', sub: 'pork', groupZh: '🥓 BBQ Pork 烤猪肉类', groupEn: '🥓 BBQ Pork', nameZh: "P9. Tangy Pork Belly", nameEn: "P9. Tangy Pork Belly", descZh: "酸甜风味五花肉", descEn: "Tangy flavored pork belly", dinnerOnly: false },
-
+      
       // Chicken
       { id: 18, main: 'bbq', sub: 'chicken', groupZh: '🍗 BBQ Chicken 烤鸡肉类', groupEn: '🍗 BBQ Chicken', nameZh: "C1. Chicken Bulgogi", nameEn: "C1. Chicken Bulgogi", descZh: "韩式甜咸鸡肉", descEn: "Korean style sweet chicken", dinnerOnly: false },
       { id: 19, main: 'bbq', sub: 'chicken', groupZh: '🍗 BBQ Chicken 烤鸡肉类', groupEn: '🍗 BBQ Chicken', nameZh: "C2. Garlic Chicken", nameEn: "C2. Garlic Chicken", descZh: "蒜香鸡肉", descEn: "Garlic flavored chicken", dinnerOnly: false },
@@ -448,43 +584,43 @@
       { id: 31, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V2. Onion", nameEn: "V2. Onion", descZh: "洋葱圈", descEn: "Sliced onion", dinnerOnly: false },
       { id: 32, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V3. Enoki Mushroom", nameEn: "V3. Enoki Mushroom", descZh: "金针菇", descEn: "Enoki mushrooms", dinnerOnly: false },
       { id: 33, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V4. Potato", nameEn: "V4. Potato", descZh: "土豆片", descEn: "Sliced potato", dinnerOnly: false },
-      { id: 34, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V5. King Mushroom", nameEn: "V5. King Mushroom", descZh: "杏鲍菇", descEn: "King oyster mushroom", dinnerOnly: false },
+      { id: 34, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V5. King Mushroom", nameEn: "V5. King Mushroom", descZh: "杏鲍菇", descEn: "King mushroom", dinnerOnly: false },
       { id: 35, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V6. Long Hot Pepper", nameEn: "V6. Long Hot Pepper", descZh: "长青椒", descEn: "Long hot pepper", dinnerOnly: false },
       { id: 36, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V7. Fresh Corn", nameEn: "V7. Fresh Corn", descZh: "鲜玉米", descEn: "Fresh sweet corn", dinnerOnly: false },
-      { id: 37, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V8. Pineapple", nameEn: "V8. Pineapple", descZh: "烤凤梨/菠萝", descEn: "Grilled pineapple", dinnerOnly: false },
+      { id: 37, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V8. Pineapple", nameEn: "V8. Pineapple", descZh: "烤凤梨/菠萝", descEn: "Sliced pineapple", dinnerOnly: false },
       { id: 38, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V9. White Mushroom", nameEn: "V9. White Mushroom", descZh: "白口蘑", descEn: "White mushroom", dinnerOnly: false },
       { id: 39, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V10. Green Leaf Lettuce", nameEn: "V10. Green Leaf Lettuce", descZh: "包肉生菜", descEn: "Fresh lettuce wraps", dinnerOnly: false },
       { id: 40, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V11. Garlic", nameEn: "V11. Garlic", descZh: "大蒜瓣", descEn: "Fresh garlic", dinnerOnly: false },
       { id: 41, main: 'bbq', sub: 'veg', groupZh: '🥬 BBQ Vegetable 烤蔬菜类', groupEn: '🥬 BBQ Vegetable', nameZh: "V12. Sweet Potato", nameEn: "V12. Sweet Potato", descZh: "红薯片/地瓜片", descEn: "Sliced sweet potato", dinnerOnly: false },
 
       // -------------------- HOT POT 火锅区 --------------------
-      // 1. Soup Base (锅底 - 已集成辣度与成分标签)
+      // 1. Soup Base
       { id: 101, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "1. 四川麻辣锅", nameEn: "1. Szechuan Hot Spicy Broth", descZh: "地道川味", descEn: "Authentic spicy flavor", dinnerOnly: false, hasSpiciness: true, isPork: true },
       { id: 102, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "2. 韩式辣汤锅", nameEn: "2. Spicy Korean Soup", descZh: "韩式浓郁辣汤", descEn: "Korean style spicy soup", dinnerOnly: false, hasSpiciness: true, isPork: true },
       { id: 103, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "3. 排骨大骨锅", nameEn: "3. Special Rib Broth", descZh: "浓郁鲜美大骨汤", descEn: "Rich rib broth", dinnerOnly: false, hasSpiciness: false, isPork: true },
       { id: 104, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "4. 番茄锅", nameEn: "4. Tomato Broth", descZh: "酸甜浓郁", descEn: "Sweet & sour tomato flavor", dinnerOnly: false, hasSpiciness: false, isPork: true },
       { id: 105, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "5. 蔬菜锅", nameEn: "5. Vegetable Broth", descZh: "清爽健康", descEn: "Healthy fresh veg broth", dinnerOnly: false, hasSpiciness: false, isHalal: true },
       { id: 106, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "6. 养生药膳锅", nameEn: "6. Rejuvenation Herb Broth", descZh: "温补滋养", descEn: "Nourishing herbal soup", dinnerOnly: false, hasSpiciness: false, isPork: true },
-      { id: 107, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "7. 冬阴功锅", nameEn: "7. Tom Yum Broth", descZh: "泰式酸辣", descEn: "Thai hot and sour broth", dinnerOnly: false, hasSpiciness: true, isPork: true },
+      { id: 107, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "7. 冬阴功锅", nameEn: "7. Tom Yum Broth", descZh: "泰式酸辣", descEn: "Thai hot and sour broth", dinnerOnly: false, hasSpiciness: true, spiceOptions: ['Mild'], isPork: true },
       { id: 108, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "8. 味味噌锅", nameEn: "8. Miso Broth", descZh: "日式醇厚味噌", descEn: "Japanese savory miso", dinnerOnly: false, hasSpiciness: false, isPork: true },
       { id: 109, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "9. 鸡汤锅", nameEn: "9. Chicken Broth", descZh: "鲜美鸡汤", descEn: "Delicious chicken broth", dinnerOnly: false, hasSpiciness: false, isHalal: true },
       { id: 110, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "10. 菌菇排骨锅", nameEn: "10. Mixed Mushroom Rib Broth", descZh: "菌菇与大骨双重鲜美", descEn: "Rich mushroom & rib broth", dinnerOnly: false, hasSpiciness: false, isPork: true },
       { id: 111, main: 'hotpot', sub: 'soup', groupZh: '🍲 Soup Base 锅底系列', groupEn: '🍲 Soup Base', nameZh: "11. 四川牛油麻辣锅", nameEn: "11. Szechuan Spicy Butter Broth", descZh: "重油重辣，香醇浓郁", descEn: "Authentic spicy butter broth", dinnerOnly: false, hasSpiciness: true, isPork: true },
 
-      // 2. Hotpot Meats (肉类)
+      // 2. Hotpot Meats
       { id: 201, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M1. 麻辣牛展", nameEn: "M1. Spicy Beef Shank", descZh: "香辣入味", descEn: "Marinated spicy shank", dinnerOnly: true },
       { id: 202, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M2. 牛舌", nameEn: "M2. Beef Tongue", descZh: "薄切爽口", descEn: "Sliced beef tongue", dinnerOnly: true },
       { id: 203, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M3. 肥羊", nameEn: "M3. Fatty Lamb", descZh: "肉质细嫩", descEn: "Sliced fatty lamb", dinnerOnly: false },
       { id: 204, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M4. 肥牛", nameEn: "M4. Fatty Beef", descZh: "经典涮肉首选", descEn: "Classic fatty beef", dinnerOnly: false },
       { id: 205, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M5. 安格斯牛", nameEn: "M5. Angus Beef", descZh: "牛肉香浓", descEn: "Premium Angus beef", dinnerOnly: false },
-      { id: 206, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M6. 安格斯牛排", nameEn: "M6. Angus Steak", descZh: "厚实多汁", descEn: "Tender Angus steak", dinnerOnly: true },
+      { id: 206, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M6. 安格斯牛排", nameEn: "M6. Angus Steak", descZh: "厚实多汁", descEn: "Sliced Angus steak", dinnerOnly: true },
       { id: 207, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M7. 招牌麻辣排骨", nameEn: "M7. Toppot Spicy Spare Rib", descZh: "入味骨香", descEn: "House special spicy ribs", dinnerOnly: false },
       { id: 208, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M8. 鸡肉", nameEn: "M8. Chicken", descZh: "鲜嫩鸡肉片", descEn: "Sliced chicken", dinnerOnly: false },
       { id: 209, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M9. 五花肉", nameEn: "M9. Pork Belly", descZh: "肥瘦相间", descEn: "Sliced pork belly", dinnerOnly: false },
       { id: 210, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M10. 黑猪肉", nameEn: "M10. Black Pork", descZh: "肉质紧实鲜美", descEn: "Premium black pork", dinnerOnly: false },
       { id: 211, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M11. 麻辣牛肉", nameEn: "M11. Spicy Beef", descZh: "火辣嫩滑", descEn: "Tender spicy beef", dinnerOnly: false },
       { id: 212, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M12. 精选牛上脑", nameEn: "M12. Chuck Tail Flap", descZh: "大理石纹理", descEn: "Marbled chuck tail flap", dinnerOnly: true },
-      { id: 213, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M13. 鸡肫", nameEn: "M13. Chicken Gizzard", descZh: "爽脆弹牙", descEn: "Crunchy chicken gizzard", dinnerOnly: false },
+      { id: 213, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M13. 鸡胗", nameEn: "M13. Chicken Gizzard", descZh: "爽脆弹牙", descEn: "Crunchy chicken gizzard", dinnerOnly: false },
       { id: 214, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M14. 肥肠", nameEn: "M14. Pork Intestine", descZh: "软糯香浓", descEn: "Pork intestine", dinnerOnly: true },
       { id: 215, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M15. 猪肚", nameEn: "M15. Pork Stomach", descZh: "嚼劲十足", descEn: "Tender pork stomach", dinnerOnly: false },
       { id: 216, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M16. 招牌毛肚", nameEn: "M16. House Special Tripe", descZh: "爽脆无比", descEn: "Crunchy house tripe", dinnerOnly: false },
@@ -497,7 +633,7 @@
       { id: 223, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M23. 无骨鸭掌", nameEn: "M23. Boneless Duck Feet", descZh: "Q弹富有胶原蛋白", descEn: "Boneless duck feet", dinnerOnly: true },
       { id: 224, main: 'hotpot', sub: 'meat', groupZh: '🥩 Hotpot Meats 火锅肉类', groupEn: '🥩 Hotpot Meats', nameZh: "M24. 炸猪皮", nameEn: "M24. Fried Pork Skin", descZh: "吸满汤汁", descEn: "Crispy fried pork skin", dinnerOnly: false },
 
-      // 3. Hotpot Seafood (海鲜)
+      // 3. Hotpot Seafood
       { id: 301, main: 'hotpot', sub: 'seafood', groupZh: '🦐 Hotpot Seafood 海鲜类', groupEn: '🦐 Hotpot Seafood', nameZh: "A1. 大虾", nameEn: "A1. Jumbo Shrimp", descZh: "鲜甜大虾", descEn: "Fresh jumbo shrimp", dinnerOnly: false },
       { id: 302, main: 'hotpot', sub: 'seafood', groupZh: '🦐 Hotpot Seafood 海鲜类', groupEn: '🦐 Hotpot Seafood', nameZh: "A2. 青口贝", nameEn: "A2. Mussel", descZh: "鲜美青口", descEn: "Fresh mussels", dinnerOnly: true },
       { id: 303, main: 'hotpot', sub: 'seafood', groupZh: '🦐 Hotpot Seafood 海鲜类', groupEn: '🦐 Hotpot Seafood', nameZh: "A3. 花蛤", nameEn: "A3. Clam", descZh: "鲜甜蛤蜊", descEn: "Fresh clams", dinnerOnly: false },
@@ -507,7 +643,7 @@
       { id: 307, main: 'hotpot', sub: 'seafood', groupZh: '🦐 Hotpot Seafood 海鲜类', groupEn: '🦐 Hotpot Seafood', nameZh: "A7. 龙利鱼片", nameEn: "A7. Flounder", descZh: "无刺鲜嫩", descEn: "Boneless flounder filet", dinnerOnly: false },
       { id: 308, main: 'hotpot', sub: 'seafood', groupZh: '🦐 Hotpot Seafood 海鲜类', groupEn: '🦐 Hotpot Seafood', nameZh: "A8. 红鲷鱼片", nameEn: "A8. Red Snapper Filet", descZh: "肉质细嫩", descEn: "Red snapper filet", dinnerOnly: false },
 
-      // 4. Hotpot Sides (丸滑副食)
+      // 4. Hotpot Sides
       { id: 401, main: 'hotpot', sub: 'sides', groupZh: '🍡 Hotpot Sides 丸滑副食', groupEn: '🍡 Hotpot Sides', nameZh: "D1. 鹌鹑蛋", nameEn: "D1. Quail Egg", descZh: "小巧入味", descEn: "Quail eggs", dinnerOnly: false },
       { id: 402, main: 'hotpot', sub: 'sides', groupZh: '🍡 Hotpot Sides 丸滑副食', groupEn: '🍡 Hotpot Sides', nameZh: "D2. 牛肉丸", nameEn: "D2. Beef Ball", descZh: "弹牙牛肉丸", descEn: "Savory beef ball", dinnerOnly: true },
       { id: 403, main: 'hotpot', sub: 'sides', groupZh: '🍡 Hotpot Sides 丸滑副食', groupEn: '🍡 Hotpot Sides', nameZh: "D3. 墨鱼丸", nameEn: "D3. Cuttlefish Ball", descZh: "鲜美墨鱼丸", descEn: "Delicious cuttlefish ball", dinnerOnly: false },
@@ -529,7 +665,7 @@
       { id: 419, main: 'hotpot', sub: 'sides', groupZh: '🍡 Hotpot Sides 丸滑副食', groupEn: '🍡 Hotpot Sides', nameZh: "D20. 鸡肉水饺", nameEn: "D20. Chicken Dumpling", descZh: "鸡肉水饺", descEn: "Chicken dumpling", dinnerOnly: false },
       { id: 420, main: 'hotpot', sub: 'sides', groupZh: '🍡 Hotpot Sides 丸滑副食', groupEn: '🍡 Hotpot Sides', nameZh: "D21. 鱼籽福袋", nameEn: "D21. Fish Roe Bag", descZh: "豆皮包裹爆浆鱼籽与鱼肉，鲜美爆汁", descEn: "Tofu skin pouch filled w. juicy fish roe", dinnerOnly: true },
 
-      // 5. Soy Bean (豆制品)
+      // 5. Soy Bean
       { id: 501, main: 'hotpot', sub: 'soybean', groupZh: '🧈 Soy Bean 豆制品类', groupEn: '🧈 Soy Bean', nameZh: "O1. 嫩豆腐", nameEn: "O1. Soft Tofu", descZh: "滑嫩豆腐", descEn: "Soft tofu", dinnerOnly: false },
       { id: 502, main: 'hotpot', sub: 'soybean', groupZh: '🧈 Soy Bean 豆制品类', groupEn: '🧈 Soy Bean', nameZh: "O2. 日本豆腐", nameEn: "O2. Japanese Tofu", descZh: "玉子豆腐", descEn: "Japanese egg tofu", dinnerOnly: false },
       { id: 503, main: 'hotpot', sub: 'soybean', groupZh: '🧈 Soy Bean 豆制品类', groupEn: '🧈 Soy Bean', nameZh: "O3. 冻豆腐", nameEn: "O3. Frozen Tofu", descZh: "吸汁冻豆腐", descEn: "Spongy frozen tofu", dinnerOnly: false },
@@ -538,7 +674,7 @@
       { id: 506, main: 'hotpot', sub: 'soybean', groupZh: '🧈 Soy Bean 豆制品类', groupEn: '🧈 Soy Bean', nameZh: "O6. 响铃卷", nameEn: "O6. Crispy Tofu Roll", descZh: "三秒即食吸汁神器", descEn: "Crispy fried tofu roll", dinnerOnly: true },
       { id: 507, main: 'hotpot', sub: 'soybean', groupZh: '🧈 Soy Bean 豆制品类', groupEn: '🧈 Soy Bean', nameZh: "O7. 油条", nameEn: "O7. Fried Dough Sticks", descZh: "火锅伴侣油条", descEn: "Chinese fried dough sticks", dinnerOnly: false },
 
-      // 6. Vegetable (蔬菜菌菇)
+      // 6. Vegetable
       { id: 601, main: 'hotpot', sub: 'veg', groupZh: '🥬 Vegetable 蔬菜菌菇类', groupEn: '🥬 Vegetable', nameZh: "E1. 凤菇", nameEn: "E1. Phoenix Mushroom", descZh: "鲜美凤菇", descEn: "Phoenix mushroom", dinnerOnly: true },
       { id: 602, main: 'hotpot', sub: 'veg', groupZh: '🥬 Vegetable 蔬菜菌菇类', groupEn: '🥬 Vegetable', nameZh: "E2. 山药", nameEn: "E2. Chinese Yam", descZh: "滋补山药片", descEn: "Chinese yam slices", dinnerOnly: true },
       { id: 603, main: 'hotpot', sub: 'veg', groupZh: '🥬 Vegetable 蔬菜菌菇类', groupEn: '🥬 Vegetable', nameZh: "E3. 西兰花", nameEn: "E3. Broccoli", descZh: "新鲜西兰花", descEn: "Fresh broccoli", dinnerOnly: false },
@@ -566,7 +702,7 @@
       { id: 625, main: 'hotpot', sub: 'veg', groupZh: '🥬 Vegetable 蔬菜菌菇类', groupEn: '🥬 Vegetable', nameZh: "E25. 花菇", nameEn: "E25. Black Mushroom", descZh: "精选花菇", descEn: "Black mushroom", dinnerOnly: false },
       { id: 626, main: 'hotpot', sub: 'veg', groupZh: '🥬 Vegetable 蔬菜菌菇类', groupEn: '🥬 Vegetable', nameZh: "E26. 白萝卜", nameEn: "E26. Daikon", descZh: "清甜白萝卜片", descEn: "Sliced daikon radish", dinnerOnly: false },
 
-      // 7. Noodle (主食面点)
+      // 7. Noodle
       { id: 701, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N1. 年糕", nameEn: "N1. Rice Cake", descZh: "软糯年糕片", descEn: "Korean rice cake", dinnerOnly: false },
       { id: 702, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N2. 方便面", nameEn: "N2. Instant Noodle", descZh: "火锅拉面/方便面", descEn: "Instant ramen noodle", dinnerOnly: false },
       { id: 703, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N3. 魔芋丝", nameEn: "N3. Yam Noodle", descZh: "低卡魔芋丝", descEn: "Healthy yam noodles", dinnerOnly: false },
@@ -574,7 +710,27 @@
       { id: 705, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N5. 拉面", nameEn: "N5. Ramen", descZh: "劲道拉面", descEn: "Fresh ramen noodles", dinnerOnly: false },
       { id: 706, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N6. 粉丝", nameEn: "N6. Vermicelli", descZh: "细粉丝", descEn: "Thin vermicelli", dinnerOnly: false },
       { id: 707, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N7. 河粉", nameEn: "N7. Pho Noodles", descZh: "顺滑河粉", descEn: "Rice pho noodles", dinnerOnly: false },
-      { id: 708, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N8. 绿豆宽粉", nameEn: "N8. Mung Bean Noodle", descZh: "Q弹绿豆宽粉", descEn: "Wide mung bean noodles", dinnerOnly: false }
+      { id: 708, main: 'hotpot', sub: 'noodle', groupZh: '🍜 Noodle 主食面类', groupEn: '🍜 Noodle', nameZh: "N8. 绿豆宽粉", nameEn: "N8. Mung Bean Noodle", descZh: "Q弹绿豆宽粉", descEn: "Wide mung bean noodles", dinnerOnly: false },
+
+      // -------------------- DRINKS 饮料区 --------------------
+      // Soda & Tea (Can Refill - $3.25)
+      { id: 801, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Pepsi 百事可乐", nameEn: "Pepsi", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+      { id: 802, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Diet Pepsi 健怡百事可乐", nameEn: "Diet Pepsi", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+      { id: 803, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Starry 柠檬七喜", nameEn: "Starry", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+      { id: 804, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Ginger Ale 干姜汽水", nameEn: "Ginger Ale", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+      { id: 805, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Crush Orange 芬达橙味汽水", nameEn: "Crush Orange", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+      { id: 806, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Pink Lemonade 粉红柠檬水", nameEn: "Pink Lemonade", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+      { id: 807, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Fruit Punch 水果果汁饮", nameEn: "Fruit Punch", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+      { id: 808, main: 'drink', sub: 'refill', groupZh: '🥤 Soft Drinks (Can Refill 畅饮饮料 $3.25)', groupEn: '🥤 Soft Drinks (Can Refill $3.25)', nameZh: "Sweet Tea 美式甜茶", nameEn: "Sweet Tea", descZh: "免费续杯", descEn: "Can Refill", price: "$3.25", dinnerOnly: false },
+
+      // Juice (No Refills - $4.50)
+      { id: 809, main: 'drink', sub: 'juice', groupZh: '🧃 Juices (No Refills 果汁类 $4.50)', groupEn: '🧃 Juices (No Refills $4.50)', nameZh: "Apple Juice 苹果汁", nameEn: "Apple Juice", descZh: "单杯/不可续杯", descEn: "No Refill", price: "$4.50", dinnerOnly: false },
+      { id: 810, main: 'drink', sub: 'juice', groupZh: '🧃 Juices (No Refills 果汁类 $4.50)', groupEn: '🧃 Juices (No Refills $4.50)', nameZh: "Orange Juice 橙汁", nameEn: "Orange Juice", descZh: "单杯/不可续杯", descEn: "No Refill", price: "$4.50", dinnerOnly: false },
+      { id: 811, main: 'drink', sub: 'juice', groupZh: '🧃 Juices (No Refills 果汁类 $4.50)', groupEn: '🧃 Juices (No Refills $4.50)', nameZh: "Cranberry Juice 蔓越莓汁", nameEn: "Cranberry Juice", descZh: "单杯/不可续杯", descEn: "No Refill", price: "$4.50", dinnerOnly: false },
+
+      // Specialty Drinks (No Refills - $3.00)
+      { id: 812, main: 'drink', sub: 'specialty', groupZh: '罐 Specialty Drinks (No Refills 特色饮料 $3.00)', groupEn: ' Specialty Drinks (No Refills $3.00)', nameZh: "王老吉 Herbal Tea", nameEn: "Wang Lao Ji (Herbal Tea)", descZh: "清凉降火/不可续杯", descEn: "Herbal Tea / No Refill", price: "$3.00", dinnerOnly: false },
+      { id: 813, main: 'drink', sub: 'specialty', groupZh: '罐 Specialty Drinks (No Refills 特色饮料 $3.00)', groupEn: ' Specialty Drinks (No Refills $3.00)', nameZh: "椰树牌椰奶 Coconut Milk", nameEn: "Coconut Milk (Coconut Tree Brand)", descZh: "正宗海南椰奶/不可续杯", descEn: "Coconut Milk / No Refill", price: "$3.00", dinnerOnly: false }
     ];
 
     function toggleLanguage() {
@@ -591,6 +747,7 @@
       document.getElementById('dinnerBtn').innerText = currentLang === 'zh' ? '🌙 DINNER (晚市专享)' : '🌙 DINNER';
       document.getElementById('mainTab-bbq').innerText = currentLang === 'zh' ? '🔥 K-BBQ 烤肉区' : '🔥 K-BBQ';
       document.getElementById('mainTab-hotpot').innerText = currentLang === 'zh' ? '🍲 HOT POT 火锅区' : '🍲 HOT POT';
+      document.getElementById('mainTab-drink').innerText = currentLang === 'zh' ? '🥤 DRINKS 饮料区' : '🥤 DRINKS';
       document.getElementById('cartLabelText').innerText = currentLang === 'zh' ? '当前已选加单' : 'Selected Items';
     }
 
@@ -601,6 +758,9 @@
       sessionLock: 'none', // 'none', 'lunch', 'dinner'
       typeLock: 'none'      // 'none', 'hotpot', 'bbq'
     };
+
+    let tempSessionLock = 'none';
+    let tempTypeLock = 'none';
 
     function saveAdminLocks() {
       localStorage.setItem('top_pot_locks', JSON.stringify(adminLocks));
@@ -646,50 +806,89 @@
       clearTimeout(clickTimer);
       clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
 
-      if (clickCount >= 10) {
+      // 修改为 5 次触发隐藏菜单
+      if (clickCount >= 5) {
         clickCount = 0;
-        const currentTable = localStorage.getItem('top_pot_table') || '1';
-        
-        const optionPrompt = currentLang === 'zh'
-          ? "⚙️ 【管理员菜单】请选择操作:\n1. 修改桌号\n2. 设置 Session 锁定 (Lunch/Dinner)\n3. 设置 品类 锁定 (Hotpot/BBQ)"
-          : "⚙️ [Admin Menu] Select option:\n1. Change Table Number\n2. Set Session Lock (Lunch/Dinner)\n3. Set Type Lock (Hotpot/BBQ)";
-        
-        const choice = prompt(optionPrompt, "1");
-
-        if (choice === "1") {
-          const promptMsg = currentLang === 'zh' ? '请输入新的桌号：' : 'Enter new table number:';
-          const newTable = prompt(promptMsg, currentTable);
-          if (newTable !== null && newTable.trim() !== "") {
-            localStorage.setItem('top_pot_table', newTable.trim());
-            updateTableDisplay();
-            alert(currentLang === 'zh' ? `✅ 桌号已成功更新为：${newTable.trim()} 号桌` : `✅ Table updated to: #${newTable.trim()}`);
-          }
-        } else if (choice === "2") {
-          const sessionPrompt = currentLang === 'zh'
-            ? "设置 Session 锁定模式:\n0. 不锁定 (自由切换)\n1. 锁定只吃 Lunch\n2. 锁定只吃 Dinner"
-            : "Set Session Lock Mode:\n0. No Lock\n1. Lock Lunch Only\n2. Lock Dinner Only";
-          const sChoice = prompt(sessionPrompt, "0");
-          if (sChoice === "1") adminLocks.sessionLock = 'lunch';
-          else if (sChoice === "2") adminLocks.sessionLock = 'dinner';
-          else if (sChoice === "0") adminLocks.sessionLock = 'none';
-
-          saveAdminLocks();
-          renderSubTabs();
-          renderMenu();
-        } else if (choice === "3") {
-          const typePrompt = currentLang === 'zh'
-            ? "设置品类锁定模式:\n0. 不锁定 (自由切换)\n1. 锁定只吃 Hot Pot (禁用 BBQ)\n2. 锁定只吃 BBQ (禁用 Hot Pot)"
-            : "Set Type Lock Mode:\n0. No Lock\n1. Lock Hot Pot Only\n2. Lock BBQ Only";
-          const tChoice = prompt(typePrompt, "0");
-          if (tChoice === "1") adminLocks.typeLock = 'hotpot';
-          else if (tChoice === "2") adminLocks.typeLock = 'bbq';
-          else if (tChoice === "0") adminLocks.typeLock = 'none';
-
-          saveAdminLocks();
-          renderSubTabs();
-          renderMenu();
-        }
+        openAdminModal();
       }
+    }
+
+    function openAdminModal() {
+      const currentTable = localStorage.getItem('top_pot_table') || '1';
+      document.getElementById('adminTableInput').value = currentTable;
+
+      tempSessionLock = adminLocks.sessionLock;
+      tempTypeLock = adminLocks.typeLock;
+
+      updateModalToggleUI();
+
+      if (currentLang === 'en') {
+        document.getElementById('adminModalTitle').innerText = "⚙️ Admin Settings";
+        document.getElementById('adminTableLabel').innerText = "Table Number:";
+        document.getElementById('adminSessionLabel').innerText = "Session Lock:";
+        document.getElementById('adminTypeLabel').innerText = "Type Lock:";
+        document.getElementById('sLock-none').innerText = "No Lock";
+        document.getElementById('sLock-lunch').innerText = "Lunch Only";
+        document.getElementById('sLock-dinner').innerText = "Dinner Only";
+        document.getElementById('tLock-none').innerText = "No Lock";
+        document.getElementById('tLock-hotpot').innerText = "Hot Pot Only";
+        document.getElementById('tLock-bbq').innerText = "BBQ Only";
+      } else {
+        document.getElementById('adminModalTitle').innerText = "⚙️ 管理员设置";
+        document.getElementById('adminTableLabel').innerText = "桌号设置：";
+        document.getElementById('adminSessionLabel').innerText = "Session 锁定：";
+        document.getElementById('adminTypeLabel').innerText = "品类锁定：";
+        document.getElementById('sLock-none').innerText = "不锁定";
+        document.getElementById('sLock-lunch').innerText = "仅 Lunch";
+        document.getElementById('sLock-dinner').innerText = "仅 Dinner";
+        document.getElementById('tLock-none').innerText = "不锁定";
+        document.getElementById('tLock-hotpot').innerText = "仅 Hot Pot";
+        document.getElementById('tLock-bbq').innerText = "仅 BBQ";
+      }
+
+      document.getElementById('adminModal').style.display = 'flex';
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').style.display = 'none';
+    }
+
+    function setSessionLockTemp(val) {
+      tempSessionLock = val;
+      updateModalToggleUI();
+    }
+
+    function setTypeLockTemp(val) {
+      tempTypeLock = val;
+      updateModalToggleUI();
+    }
+
+    function updateModalToggleUI() {
+      ['none', 'lunch', 'dinner'].forEach(v => {
+        const btn = document.getElementById(`sLock-${v}`);
+        if (btn) btn.classList.toggle('active', tempSessionLock === v);
+      });
+
+      ['none', 'hotpot', 'bbq'].forEach(v => {
+        const btn = document.getElementById(`tLock-${v}`);
+        if (btn) btn.classList.toggle('active', tempTypeLock === v);
+      });
+    }
+
+    function saveAdminModal() {
+      const newTable = document.getElementById('adminTableInput').value.trim();
+      if (newTable) {
+        localStorage.setItem('top_pot_table', newTable);
+        updateTableDisplay();
+      }
+
+      adminLocks.sessionLock = tempSessionLock;
+      adminLocks.typeLock = tempTypeLock;
+
+      saveAdminLocks();
+      renderSubTabs();
+      renderMenu();
+      closeAdminModal();
     }
 
     function getTableNumber() {
@@ -747,6 +946,7 @@
       currentSub = 'all';
       document.getElementById('mainTab-bbq').classList.toggle('active', mainType === 'bbq');
       document.getElementById('mainTab-hotpot').classList.toggle('active', mainType === 'hotpot');
+      document.getElementById('mainTab-drink').classList.toggle('active', mainType === 'drink');
       renderSubTabs();
       renderMenu();
     }
@@ -772,14 +972,14 @@
           { key: 'seafood', name: '🦐 Seafood' },
           { key: 'veg', name: '🥬 Veg' }
         ];
-      } else {
+      } else if (currentMain === 'hotpot') {
         subs = currentLang === 'zh' ? [
           { key: 'all', name: '全部火锅' },
           { key: 'soup', name: '🍲 锅底' },
           { key: 'meat', name: '🥩 肉类' },
           { key: 'seafood', name: '🦐 海鲜' },
           { key: 'sides', name: '🍡 丸滑副食' },
-          { key: 'soybean', name: '🫘 豆制品' },
+          { key: 'soybean', name: '🧈 豆制品' },
           { key: 'veg', name: '🥬 蔬菜菌菇' },
           { key: 'noodle', name: '🍜 主食面类' }
         ] : [
@@ -788,9 +988,21 @@
           { key: 'meat', name: '🥩 Meats' },
           { key: 'seafood', name: '🦐 Seafood' },
           { key: 'sides', name: '🍡 Sides' },
-          { key: 'soybean', name: '🫘 Soy Bean' },
+          { key: 'soybean', name: '🧈 Soy Bean' },
           { key: 'veg', name: '🥬 Vegetables' },
           { key: 'noodle', name: '🍜 Noodles' }
+        ];
+      } else if (currentMain === 'drink') {
+        subs = currentLang === 'zh' ? [
+          { key: 'all', name: '全部饮料' },
+          { key: 'refill', name: '🥤 畅饮汽水' },
+          { key: 'juice', name: '🧃 鲜果汁' },
+          { key: 'specialty', name: '罐 特色饮品' }
+        ] : [
+          { key: 'all', name: 'All Drinks' },
+          { key: 'refill', name: '🥤 Soft Drinks' },
+          { key: 'juice', name: '🧃 Juices' },
+          { key: 'specialty', name: '罐 Specialty' }
         ];
       }
 
@@ -847,16 +1059,30 @@
           dietTagHtml = `<div class="diet-tag halal">${currentLang === 'zh' ? '✅ Halal Friendly (清真友好)' : '✅ Halal Friendly'}</div>`;
         }
 
-        // 辣度下拉选框 (仅限制带有 hasSpiciness 的菜品)
+        // 显示价格（如有）
+        let priceHtml = item.price ? `<div class="item-price">${item.price}</div>` : '';
+
+        // 辣度下拉选框 (支持根据 spiceOptions 自定义选项)
         let spiceSelectHtml = '';
         if (item.hasSpiciness) {
+          const allowedSpices = item.spiceOptions || ['Mild', 'Medium', 'Hot'];
+          let optionsHtml = '';
+
+          if (allowedSpices.includes('Mild')) {
+            optionsHtml += `<option value="Mild" ${allowedSpices.length === 1 ? 'selected' : ''}>${currentLang === 'zh' ? '微辣 Mild' : 'Mild'}</option>`;
+          }
+          if (allowedSpices.includes('Medium')) {
+            optionsHtml += `<option value="Medium" selected>${currentLang === 'zh' ? '中辣 Medium' : 'Medium'}</option>`;
+          }
+          if (allowedSpices.includes('Hot')) {
+            optionsHtml += `<option value="Hot">${currentLang === 'zh' ? '大辣 Hot' : 'Hot'}</option>`;
+          }
+
           spiceSelectHtml = `
             <div class="spice-ctrl">
               <span class="spice-label">${currentLang === 'zh' ? '辣度:' : 'Spice:'}</span>
               <select class="spice-select" id="spice-${item.id}">
-                <option value="Mild">${currentLang === 'zh' ? '微辣 Mild' : 'Mild'}</option>
-                <option value="Medium" selected>${currentLang === 'zh' ? '中辣 Medium' : 'Medium'}</option>
-                <option value="Hot">${currentLang === 'zh' ? '大辣 Hot' : 'Hot'}</option>
+                ${optionsHtml}
               </select>
             </div>
           `;
@@ -876,6 +1102,7 @@
           <div class="item-info">
             <div class="item-name">${itemName}</div>
             <div class="item-desc">${itemDesc}</div>
+            ${priceHtml}
             ${dietTagHtml}
             ${spiceSelectHtml}
             ${item.dinnerOnly ? `<div class="dinner-tag">${tagText}</div>` : ''}
@@ -907,7 +1134,8 @@
 
       if (item && item.hasSpiciness) {
         const spiceElem = document.getElementById(`spice-${id}`);
-        selectedSpice = spiceElem ? spiceElem.value : 'Medium';
+        const defaultSpice = (item.spiceOptions && item.spiceOptions.length > 0) ? item.spiceOptions[0] : 'Medium';
+        selectedSpice = spiceElem ? spiceElem.value : defaultSpice;
       }
 
       // 生成唯一的 key
@@ -954,8 +1182,9 @@
         if (item) {
           totalCount += cartItem.qty;
           const n = currentLang === 'zh' ? item.nameZh : item.nameEn;
+          const priceText = item.price ? ` (${item.price})` : '';
           const spiceText = cartItem.spice ? ` [辣度: ${cartItem.spice}]` : '';
-          orderItems.push(`- **${n}**${spiceText} x${cartItem.qty}`);
+          orderItems.push(`- **${n}**${priceText}${spiceText} x${cartItem.qty}`);
         }
       }
 
